@@ -14,3 +14,7 @@ coverage/
 .env
 /storage/*.key
 /storage/logs/
+/vendor/
+vendor.zip
+.env
+.DS_Store

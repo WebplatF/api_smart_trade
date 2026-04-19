@@ -61,7 +61,7 @@ trait CommonTraits
      */
     function signCdnUrl(string $path, int $ttl = 120): string
     {
-        $cdn    = 'https://cdn.webplatf.site';
+        $cdn    = 'https://cdn.smarttradeind.com';
         $secret = 'kgrbIyzna4OejRYJOeZWsidKW14gZz4HJeHnno9t';
         // Ensure leading slash
         if ($path[0] !== '/') $path = '/' . $path;

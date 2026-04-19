@@ -13,9 +13,9 @@ return [
     'allowed_methods' => ['GET', 'POST', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => [
-        'http://localhost:4200',
-        'https://webplatf.site',
-        'https://smart-trade-001.web.app'
+        // 'http://localhost:4200',
+        'https://smarttradeind.com/home',
+        'https://admin.smarttradeind.com'
     ],
 
     'allowed_headers' => [

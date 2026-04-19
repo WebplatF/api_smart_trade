@@ -14,7 +14,7 @@ return [
 
     'allowed_origins' => [
         // 'http://localhost:4200',
-        'https://smarttradeind.com/',
+        'https://smarttradeind.com',
         'https://admin.smarttradeind.com'
     ],
 

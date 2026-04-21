@@ -137,7 +137,7 @@ class HomePageService
                     $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
                     $response['weekly_meeting'][] = [
                         'title' => $item->title,
-                        'video_id' => $item->video->video_id,
+                        'path' => $item->video->video_id,
                         'thumbnail' => $image_path
                     ];
             }
@@ -163,7 +163,7 @@ class HomePageService
             $weeklyMeeting = WeeklyMeeting::where('is_delete',0)->with([
                 'video',
                 'video.thumbnail'
-            ]);
+            ])->get();
             $response = [
                 'banner' => [],
                 'demo_videos' => [],

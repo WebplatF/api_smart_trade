@@ -32,7 +32,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->get('/weekly_meeting', 'Admin\HomePageController@getWeeklyMeeting');
     $router->get('/common/wasabi_file', 'Admin\CommonController@getWasabiFile');
     $router->get('/common/wasabi_video', 'Admin\CommonController@getWasabiVideo');
-    $router->get('/get_video_url', ['middleware' => 'token', 'uses' => 'Admin\CommonController@getVideoUrl']);
+    $router->get('/get_video_url', 'Admin\CommonController@getVideoUrl');
     $router->get('/subscription_list', ['middleware' => 'token', 'uses' => 'Admin\SubscriptionController@subScriptionList']);
     $router->post('/common/image_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageUpload']);
     $router->post('/user_subscription', ['middleware' => 'token', 'uses' => 'Admin\SubscriptionController@userSubscription']);

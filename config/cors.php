@@ -13,7 +13,7 @@ return [
     'allowed_methods' => ['GET', 'POST', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => [
-        // 'http://localhost:4200',
+        'http://localhost:4200',
         'https://smarttradeind.com',
         'https://admin.smarttradeind.com'
     ],

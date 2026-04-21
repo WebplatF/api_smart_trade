@@ -203,7 +203,7 @@ class CommonService
                 continue;
             }
             if (!str_starts_with($line, 'http')) {
-                $line = "https://cdn.webplatf.site/" . dirname($videoId) . "/" . ltrim($line, '/');
+                $line = "https://cdn.smarttradeind.com/" . dirname($videoId) . "/" . ltrim($line, '/');
             }
         }
 

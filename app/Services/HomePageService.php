@@ -185,7 +185,7 @@ class HomePageService
                 }
             }
             foreach ($weeklyMeeting as $item) {
-                    $response['demo_videos'][] = [
+                    $response['weekly_meeting'][] = [
                         'title' => $item->title,
                         'video_id' => $item->video->video_id,
                         'thumbnail' => $item->video->thumbnail->media_url

@@ -20,7 +20,7 @@ class HomePageService
     public function addBanner(string $title, int $imageId)
     {
         try {
-            $banner = HomePageMaster::where('title', $title)->firt();
+            $banner = HomePageMaster::where('title', $title)->first();
             if (!$banner) {
                 HomePageMaster::create(
                     [

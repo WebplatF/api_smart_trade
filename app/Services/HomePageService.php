@@ -20,20 +20,13 @@ class HomePageService
     public function addBanner(string $title, int $imageId)
     {
         try {
-            $banner = HomePageMaster::where('title', $title)->first();
-            if (!$banner) {
-                HomePageMaster::create(
-                    [
-                        'title' => $title,
-                        'source_id' => $imageId,
-                        'type' => 'image'
-                    ]
-                );
-            } else {
-                $banner->update([
+            HomePageMaster::updateOrCreate(
+                ['title' => $title], // condition to find
+                [
                     'source_id' => $imageId,
-                ]);
-            }
+                    'type' => 'image'
+                ]
+            );
             return "";
         } catch (Exception $e) {
             throw new Exception("Banner add Failed:" . $e->getMessage());

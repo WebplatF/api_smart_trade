@@ -20,13 +20,20 @@ class HomePageService
     public function addBanner(string $title, int $imageId)
     {
         try {
-            HomePageMaster::create(
-                [
-                    'title' => $title,
+            $banner = HomePageMaster::where('title', $title)->firt();
+            if (!$banner) {
+                HomePageMaster::create(
+                    [
+                        'title' => $title,
+                        'source_id' => $imageId,
+                        'type' => 'image'
+                    ]
+                );
+            } else {
+                $banner->update([
                     'source_id' => $imageId,
-                    'type' => 'image'
-                ]
-            );
+                ]);
+            }
             return "";
         } catch (Exception $e) {
             throw new Exception("Banner add Failed:" . $e->getMessage());
@@ -134,12 +141,12 @@ class HomePageService
                 'weekly_meeting' => []
             ];
             foreach ($queryData as $item) {
-                    $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
-                    $response['weekly_meeting'][] = [
-                        'title' => $item->title,
-                        'path' => $item->video->video_id,
-                        'thumbnail' => $image_path
-                    ];
+                $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
+                $response['weekly_meeting'][] = [
+                    'title' => $item->title,
+                    'path' => $item->video->video_id,
+                    'thumbnail' => $image_path
+                ];
             }
             return $response;
         } catch (Exception $e) {
@@ -160,7 +167,7 @@ class HomePageService
                 'video',
                 'video.thumbnail'
             ])->get();
-            $weeklyMeeting = WeeklyMeeting::where('is_delete',0)->with([
+            $weeklyMeeting = WeeklyMeeting::where('is_delete', 0)->with([
                 'video',
                 'video.thumbnail'
             ])->get();
@@ -185,12 +192,11 @@ class HomePageService
                 }
             }
             foreach ($weeklyMeeting as $item) {
-                    $response['weekly_meeting'][] = [
-                        'title' => $item->title,
-                        'video_id' => $item->video->video_id,
-                        'thumbnail' => $item->video->thumbnail->media_url
-                    ];
-                
+                $response['weekly_meeting'][] = [
+                    'title' => $item->title,
+                    'video_id' => $item->video->video_id,
+                    'thumbnail' => $item->video->thumbnail->media_url
+                ];
             }
             return $response;
         } catch (Exception $e) {

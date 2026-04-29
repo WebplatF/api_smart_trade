@@ -260,7 +260,7 @@ class AuthService
             if (!$user) {
                 throw new Exception("This mail is not register.");
             }
-            $otp = rand(100000, 999999);
+            $otp = random_int(1000, 9999);
             $txnId = Str::uuid();
             OtpMaster::create([
                 'user_id' => $user->id,

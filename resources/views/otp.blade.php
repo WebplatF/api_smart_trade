@@ -19,7 +19,7 @@
                     <!-- Header / Logo -->
                     <tr>
                         <td align="center" style="padding:20px;">
-                            <img src="https://smart-trade-001.web.app/assets/images/horizontal_logo.png"
+                            <img src="https://smarttradeind.com/assets/images/Smart%20Trade%20Logo%20Redesign%202-2.png"
                                 alt="Smart Trade" width="250" style="display:block;">
                         </td>
                     </tr>

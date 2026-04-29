@@ -297,7 +297,7 @@ class AuthService
             if (!$user) {
                 throw new Exception("This mail is not register.");
             }
-            $otpRow =   OtpMaster::where('trx_id', $txnId)->where('is_delete', 0)->fist();
+            $otpRow =   OtpMaster::where('trx_id', $txnId)->where('is_delete', 0)->first();
             if (!$otpRow) {
                 throw new Exception("This OTP is invalid.");
             }

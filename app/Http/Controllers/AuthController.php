@@ -165,7 +165,7 @@ class AuthController extends Controller
                 email: $request->get('email'),
                 password: $request->get('password')
             );
-            return ResponseHelper::successResponse(data: $response, message: "Otp verified successfully...!", code: 200);
+            return ResponseHelper::successResponse(data: $response, message: "Password changed successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

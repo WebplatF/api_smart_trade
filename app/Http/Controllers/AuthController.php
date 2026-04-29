@@ -163,7 +163,7 @@ class AuthController extends Controller
             }
             $response = $this->authService->changePassword(
                 email: $request->get('email'),
-                password: $request->get('otp')
+                password: $request->get('password')
             );
             return ResponseHelper::successResponse(data: $response, message: "Otp verified successfully...!", code: 200);
         } catch (Throwable $e) {

@@ -161,7 +161,7 @@ class CourseService
     public function courseList()
     {
         try {
-            $course = CourseMaster::with('image')->get();
+            $course = CourseMaster::with('image')->where('is_delete',0)->get();
             return CourseMasterResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
@@ -253,7 +253,7 @@ class CourseService
                     $query->where('user_id', $userId)
                         ->where('subscription_id', $subscriptionId);
                 }
-            ])->first();
+            ])->where('is_delete',0)->first();
             if (!$data) {
                 throw new Exception("No Course is available...!");
             }

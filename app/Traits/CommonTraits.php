@@ -67,10 +67,14 @@ trait CommonTraits
         if ($path[0] !== '/') $path = '/' . $path;
         // Use raw path, do not encode segments
         $canonicalPath = $path;
-
+        // Encode each segment properly
+        $segments = explode('/', $path);
+        $encodedPath = implode('/', array_map(function ($segment) {
+            return rawurlencode($segment);
+        }, $segments));
         $expires = time() + $ttl;
-        $token   = hash_hmac('sha256', $canonicalPath . $expires, $secret);
+        $token   = hash_hmac('sha256', $encodedPath . $expires, $secret);
 
-        return "{$cdn}{$canonicalPath}?token={$token}&expires={$expires}";
+        return "{$cdn}{$encodedPath}?token={$token}&expires={$expires}";
     }
 }

@@ -69,7 +69,7 @@ trait CommonTraits
 
         // encode safely
         $encodedPath = implode('/', array_map(
-            fn($segment) => rawurlencode($segment),
+            'rawurlencode',
             explode('/', $path)
         ));
 

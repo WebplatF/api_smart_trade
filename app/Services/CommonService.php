@@ -140,6 +140,7 @@ class CommonService
     public function getWasabiFile(string $filePath)
     {
         try {
+            dd("File Path",$filePath);
             // Generate pre-signed URL
             $command = $this->s3->getCommand('GetObject', [
                 'Bucket' => $this->bucket,

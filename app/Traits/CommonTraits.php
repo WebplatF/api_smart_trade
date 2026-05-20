@@ -61,20 +61,25 @@ trait CommonTraits
      */
     function signCdnUrl(string $path, int $ttl = 120): string
     {
-        $cdn    = 'https://cdn.smarttradeind.com';
+        $cdn = 'https://cdn.smarttradeind.com';
         $secret = 'kgrbIyzna4OejRYJOeZWsidKW14gZz4HJeHnno9t';
-        // Ensure leading slash
-        if ($path[0] !== '/') $path = '/' . $path;
-        // Use raw path, do not encode segments
-        $canonicalPath = $path;
-        // Encode each segment properly
-        $segments = explode('/', $path);
-        $encodedPath = implode('/', array_map(function ($segment) {
-            return rawurlencode($segment);
-        }, $segments));
-        $expires = time() + $ttl;
-        $token   = hash_hmac('sha256', $encodedPath . $expires, $secret);
 
-        return "{$cdn}{$encodedPath}?token={$token}&expires={$expires}";
+        // remove extra slash
+        $path = ltrim($path, '/');
+
+        // encode safely
+        $encodedPath = implode('/', array_map(
+            fn($segment) => rawurlencode($segment),
+            explode('/', $path)
+        ));
+
+        $expires = time() + $ttl;
+
+        // SAME FORMAT AS WORKER
+        $data = '/' . $encodedPath . $expires;
+
+        $token = hash_hmac('sha256', $data, $secret);
+
+        return "{$cdn}/{$encodedPath}?token={$token}&expires={$expires}";
     }
 }

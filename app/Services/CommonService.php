@@ -7,6 +7,7 @@ use App\Models\ImageUpload;
 use App\Models\VideoUpload;
 use App\Resources\ImagesResources;
 use App\Resources\VideosResources;
+use App\ResponseModel\CommonListResponseModel;
 use App\Traits\CommonTraits;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -235,12 +236,17 @@ class CommonService
      * @param array $imagesList
      * @throws Exception
      */
-    public function imageList(): array
+    public function imageList(): CommonListResponseModel
     {
         try {
             $images = ImageUpload::whereNotNull('title')->paginate(15);
             $imageList =  ImagesResources::collection($images->items())->resolve();
-            return $imageList;
+            $imageResponse = new CommonListResponseModel(
+                currentPage: $images->currentPage(),
+                totalRecords: $images->total(),
+                dataList: $imageList
+            );
+            return $imageResponse;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -249,12 +255,17 @@ class CommonService
      * @param array $videosList
      * @throws Exception
      */
-    public function videoList(): array
+    public function videoList(): CommonListResponseModel
     {
         try {
             $videos = VideoUpload::with('thumbnail')->paginate(15);
             $videoList =  VideosResources::collection($videos->items())->resolve();
-            return $videoList;
+            $videoResponse = new CommonListResponseModel(
+                currentPage: $videos->currentPage(),
+                totalRecords: $videos->total(),
+                dataList: $videoList
+            );
+            return $videoResponse;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

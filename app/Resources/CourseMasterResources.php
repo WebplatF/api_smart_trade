@@ -12,7 +12,8 @@ class CourseMasterResources extends JsonResource
             "id" => $this->id,
             'title' => $this->title ?? "",
             'expert' => $this->expert ?? "",
-            'thumbnail_id' => $this->image->media_url ?? "",
+            'thumbnail_id' => (int)$this->image->id ?? 0,
+            'thumbnail_url' => $this->image->media_url ?? "",
             'is_delete' => (bool)$this->is_delete ?? false,
         ];
     }

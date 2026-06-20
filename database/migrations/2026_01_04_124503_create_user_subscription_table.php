@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('subscription_id');
+            $table->string('plan_name', 50);
+            $table->string('amount', 10);
             $table->string('start_date', 10)->nullable();
             $table->string('end_date', 10)->nullable();
             $table->string('renew_date', 10)->nullable();

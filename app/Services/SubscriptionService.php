@@ -230,6 +230,10 @@ class SubscriptionService
                 }
                 $user->update([
                     "status" => "approved",
+                    'plan_name' => $plan->plan_name ?? "",
+                    'amount' => $plan->amount ?? "",
+                    'validity' => $plan->validity ?? "",
+                    'duration' => $plan->duration ?? "",
                     "start_date" => $startDate->toDateString(),
                     "renew_date" => $endDate->toDateString(),
                     "end_date" => $endDate->toDateString()

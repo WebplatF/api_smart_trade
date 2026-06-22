@@ -60,7 +60,7 @@ $app->singleton(
 
 $app->configure('app');
 $app->configure('AppConfig');
-$app->configure('cors');
+// $app->configure('cors');
 $app->configure('queue');    
 $app->configure('mail');   
 // $app->configure('filesystem');

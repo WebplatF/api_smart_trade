@@ -76,8 +76,11 @@ $app->configure('mail');
 |
 */
 
+// $app->middleware([
+//     Fruitcake\Cors\HandleCors::class,
+// ]);
 $app->middleware([
-    Fruitcake\Cors\HandleCors::class,
+    App\Http\Middleware\CorsMiddleware::class
 ]);
 $app->routeMiddleware([
     'apikey' => App\Http\Middleware\ApikeyAuth::class,

@@ -3,11 +3,13 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
 
 class CorsMiddleware
 {
     public function handle($request, Closure $next)
     {
+        Log::info("Middle ware woring");
         $allowedOrigins = [
             // 'http://localhost:4200',
             'https://smarttradeind.com',

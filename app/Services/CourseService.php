@@ -176,7 +176,7 @@ class CourseService
     public function courseLessonList(int $courseId)
     {
         try {
-            $course = CourseDetails::withCount('videos')->where('course_id', $courseId)->get();
+            $course = CourseDetails::withCount('videos')->where('is_delete',0)->where('course_id', $courseId)->get();
             return CourseLessonResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
@@ -191,7 +191,7 @@ class CourseService
     public function lessonVideoList(int $detailId)
     {
         try {
-            $course = CourseVideos::with('image', 'video')->where('detail_id', $detailId)->get();
+            $course = CourseVideos::with('image', 'video')->where('is_delete',0)->where('detail_id', $detailId)->get();
             return VideoListResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));

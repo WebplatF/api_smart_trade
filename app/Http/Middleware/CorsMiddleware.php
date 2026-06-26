@@ -10,7 +10,7 @@ class CorsMiddleware
     public function handle($request, Closure $next)
     {
         $allowedOrigins = [
-            // 'http://localhost:4200',
+            'http://localhost:4200',
             'https://smarttradeind.com',
             'https://admin.smarttradeind.com'
         ];

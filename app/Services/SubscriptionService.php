@@ -167,8 +167,6 @@ class SubscriptionService
                         'image_id' => $imageId,
                         'plan_name' => $subscription->plan_name ?? "",
                         'amount' => $subscription->amount ?? "",
-                        'validity' => $subscription->validity ?? "",
-                        'duration' => $subscription->duration ?? "",
                     ]
                 );
                 return [

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('plan_name', 50)->unique();
             $table->string('amount', 10);
-            $table->string('validity', 20);
+            $table->string('validity', 10);
             $table->string('duration', 3);
             $table->boolean('is_delete')->default(false);
             $table->timestamps();

@@ -31,7 +31,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->post('/auth/admin_login', 'AuthController@adminLogin');
     $router->post('/auth/logout', ['middleware' => 'token', 'uses' => 'AuthController@logout']);
     $router->get('/user/profile', ['middleware' => 'token', 'uses' => 'User\UserController@userProfile']);
-    $router->post('/payment/order', ['middleware' => 'token', 'uses' => 'Payment/PaymentController@orderUnlock']);
+    $router->post('/payment/order', ['middleware' => 'token', 'uses' => 'Payment\PaymentController@orderUnlock']);
     $router->post('/auth/refresh', 'AuthController@refresh');
     $router->get('/initial_data', 'Admin\HomePageController@initialData');
     $router->get('/weekly_meeting', 'Admin\HomePageController@getWeeklyMeeting');

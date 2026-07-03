@@ -84,7 +84,8 @@ $app->middleware([
 ]);
 $app->routeMiddleware([
     'apikey' => App\Http\Middleware\ApikeyAuth::class,
-    'token' => App\Http\Middleware\TokenAuth::class
+    'token' => App\Http\Middleware\TokenAuth::class,
+    'payment' => App\Http\Middleware\PaymentAuth::class,
 ]);
 
 /*

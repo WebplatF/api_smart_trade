@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ResponseModels;
+namespace App\ResponseModel;
 
 class OrderResponseModel
 {

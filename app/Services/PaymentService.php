@@ -67,7 +67,7 @@ class PaymentService{
             $body = json_decode($e->getResponse()->getBody(), true);
             throw new Exception('description' . $body['description'] ?? "" . ',reason' . $body['reason'] ?? "");
         } catch (QueryException $e) {
-            throw new Exception("Payment creation failed: " . $e->errorInfo[2] ?? $e->getMessage());
+            throw new Exception("Payment failed: " . $e->errorInfo[2] ?? $e->getMessage());
         } catch (Exception $e) {
             throw new Exception("Payment creation failed: " . $e->getMessage());
         }

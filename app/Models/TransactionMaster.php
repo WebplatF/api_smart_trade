@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionMaster extends Model
 {
-    protected $table = 'TranscationMaster';
+    protected $table = 'TransactionMaster';
     protected $fillable = [
         'user_id',
         'tag',

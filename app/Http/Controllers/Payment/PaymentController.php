@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Payment;
 
 use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\TransactionMaster;
 use App\Services\PaymentService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
-class PaymentController extends Controller{
+class PaymentController extends Controller
+{
     private PaymentService $paymentService;
 
     public function __construct(PaymentService $paymentService)
@@ -33,6 +37,7 @@ class PaymentController extends Controller{
             $response = $this->paymentService->orderCreate(amount: $amount, userId: $userId, tag: $tag);
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);
         } catch (Throwable $e) {
+            Log::error($e->getMessage());
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }
     }
@@ -40,20 +45,54 @@ class PaymentController extends Controller{
     public function paymentCapture(Request $request)
     {
         try {
-            $userId = $request->get('user_id');
-            $Validator = Validator::make($request->all(), [
-                'amount' => 'required|strict_string',
-                'tag' => 'required|strict_string'
-            ]);
-            if ($Validator->fails()) {
-                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            $payload = $request->getContent();
+            $data = json_decode($payload, true);
+            $event = $data['event'];
+            Log::info($event);
+            switch ($event) {
+                case 'payment.authorized':
+                    // Handle authorized payment
+                    $this->updatePaymentDetails($data);
+                    break;
+
+                case 'payment.captured':
+                    // Update DB
+                    // Activate subscription
+                    break;
             }
-            $amount = $request->get('amount');
-            $tag = $request->get('tag');
-            $response = $this->paymentService->orderCreate(amount: $amount, userId: $userId, tag: $tag);
-            return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);
         } catch (Throwable $e) {
-            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+            Log::error($e->getMessage());
         }
+    }
+
+    public function updatePaymentDetails($data)
+    {
+        // try {
+            // $orderId = $data['']
+            // $transaction = TransactionMaster::where('order_id', $orderId)->first();
+            // if (!$transaction) {
+            //     throw new Exception("Order is not created for this profile.");
+            // } else {
+            //     $transaction->update([
+            //         'status' => "Completed",
+            //         'razorypay_order_id' => $razorOrderId,
+            //         'razorypay_payment_id' => $paymentId,
+            //         'razorypay_signature' => $signature
+            //     ]);
+            //     UnlockProfile::create([
+            //         'user_id' => $userId,
+            //         'profile_id' => $profileId
+            //     ]);
+            //     $this->sendSMSMessage(
+            //         mobile: $profile->phone,
+            //         tag: 'matrimony_profile_view',
+            //         name: $profile->first_name . $profile->last_name,
+            //         profileId: $user->profile_id
+            //     );
+            //     return true;
+        //     }
+        // } catch (Exception $e) {
+        //     throw new Exception($e->getMessage());
+        // }
     }
 }

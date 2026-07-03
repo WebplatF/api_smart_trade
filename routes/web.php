@@ -18,7 +18,7 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix' => 'payment','middleware' => 'payment'], function () use ($router) {
-    $router->post('/capture', 'Payment/PaymentController@courseList');
+    $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
 
 $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($router) {

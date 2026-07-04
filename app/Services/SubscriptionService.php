@@ -121,7 +121,8 @@ class SubscriptionService
     public function userSubscription(
         int $planId,
         int $imageId,
-        int $userId
+        int $userId,
+        string $code = ''
     ) {
         try {
             $now = Carbon::now();
@@ -167,6 +168,8 @@ class SubscriptionService
                         'image_id' => $imageId,
                         'plan_name' => $subscription->plan_name ?? "",
                         'amount' => $subscription->amount ?? "",
+                        'duration' => $subscription->duration ?? "",
+                        'coupon' => $code ?? "",
                     ]
                 );
                 return [

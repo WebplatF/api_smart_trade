@@ -138,7 +138,8 @@ class SubscriptionController extends Controller
             }
             $Validator = Validator::make($request->all(), [
                 'plan_id' => 'required|strict_int',
-                'image_id' => 'required|strict_int'
+                'image_id' => 'required|strict_int',
+                'code' => 'required|strict_int',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
@@ -146,6 +147,7 @@ class SubscriptionController extends Controller
             $retunResponse = $this->subscriptionService->userSubscription(
                 planId: $request->get('plan_id'),
                 imageId: $request->get('image_id'),
+                code: $request->get('code'),
                 userId: (int)$userId
             );
             return ResponseHelper::successResponse(

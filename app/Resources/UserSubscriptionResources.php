@@ -22,6 +22,7 @@ class UserSubscriptionResources extends JsonResource
             'end_date' => $this->end_date ?? "",
             'renew_date' => $this->renew_date ?? "",
             'image_path' => $this->image->media_url ?? "",
+            'coupon' => $this->coupon ?? "",
             'status' => $this->status ?? "pending",
             'is_active' => (bool)$this->is_delete ?? false,
         ];

@@ -57,4 +57,17 @@ class CouponController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+    public function applyCoupon(Request $request)
+    {
+        try {
+            $code = $request->query('code');
+            if (!$code) {
+                throw new Exception('Code is required');
+            }
+            $coupon = $this->couponService->applyCoupon(code: $code);
+            return ResponseHelper::successResponse(data: $coupon, message: "Coupon details arrived successfully...!");
+        } catch (Exception $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
 }

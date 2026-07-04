@@ -43,7 +43,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->post('/user_subscription', ['middleware' => 'token', 'uses' => 'Admin\SubscriptionController@userSubscription']);
     $router->get('/course_details', ['middleware' => 'token', 'uses' => 'Admin\CourseController@getCourseWithLesson']);
     $router->post('/unlock_video', ['middleware' => 'token', 'uses' => 'User\UserController@unlockVideo']);
-    $router->post('/video_status', ['middleware' => 'token', 'uses' => 'User\UserController@videoUpdate']);
+    $router->post('/video_status', ['middleware' => 'token', 'uses' => 'User\UserController@videoUpdate']); 
+    $router->post('/apply_coupon', ['middleware' => 'token', 'uses' => 'Coupon\CouponController@applyCoupon']);
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');
         $router->post('/add_demo', 'Admin\HomePageController@addDemoVideo');

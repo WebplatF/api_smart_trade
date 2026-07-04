@@ -18,7 +18,7 @@ class PaymentService
         $this->subscriptionService = $subscriptionService;
     }
 
-    public function orderCreate(int $planId, int $amount, string $tag, int $userId)
+    public function orderCreate(string $code,int $planId, int $amount, string $tag, int $userId)
     {
         try {
             $paise = (int) round($amount * 100);
@@ -26,7 +26,7 @@ class PaymentService
             $client = new Client();
             $apikey = config('AppConfig.key_id');
             $secretKey = config('AppConfig.key_secret');
-            $userSubscribe = $this->subscriptionService->userSubscription(planId: $planId, imageId: 1, userId: $userId);
+            $userSubscribe = $this->subscriptionService->userSubscription(planId: $planId, imageId: 1, userId: $userId,code:$code);
             if ($userSubscribe) {
                 $razorResponse = $client->post(
                     'https://api.razorpay.com/v1/orders',

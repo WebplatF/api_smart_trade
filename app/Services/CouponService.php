@@ -83,4 +83,22 @@ class CouponService
             throw new Exception($e->getMessage());
         }
     }
+    public function applyCoupon(string $code)
+    {
+        try {
+            $coupon = CouponMaster::where('code', $code)->where('is_delete', 0)->first();
+            if (!$coupon) {
+                throw new Exception('Invalid coupon');
+            }
+            return [
+                "code" => $code,
+                "discount_type" => $coupon->discount_type ?? "",
+                "value" => $coupon->value ?? ""
+            ];
+        } catch (QueryException $e) {
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }

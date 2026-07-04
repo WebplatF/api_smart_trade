@@ -139,7 +139,6 @@ class SubscriptionController extends Controller
             $Validator = Validator::make($request->all(), [
                 'plan_id' => 'required|strict_int',
                 'image_id' => 'required|strict_int',
-                'code' => 'required|strict_int',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);

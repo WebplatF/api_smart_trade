@@ -29,14 +29,13 @@ class PaymentController extends Controller
                 'amount' => 'required|strict_string',
                 'plan_id' => 'required|strict_int',
                 'tag' => 'required|strict_string',
-                'code' => 'required|strict_string',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
             $amount = (int)$request->get('amount');
             $planId = (int)$request->get('plan_id');
-            $code = (int)$request->get('code');
+            $code = $request->get('code');
             $tag = $request->get('tag');
             $response = $this->paymentService->orderCreate(code:$code,amount: $amount, userId: $userId, tag: $tag, planId: $planId);
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);

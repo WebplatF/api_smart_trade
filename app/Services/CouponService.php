@@ -53,12 +53,12 @@ class CouponService
     {
         try {
             DB::transaction(function () use ($couponStatusUpdateModel) {
-                $coupon = CouponMaster::where($couponStatusUpdateModel->id);
+                $coupon = CouponMaster::where($couponStatusUpdateModel->id)->find();
                 if (!$coupon) {
                     throw new Exception("Invalid coupon");
                 }
                 $coupon->update([
-                    'is_delete' => $couponStatusUpdateModel->status
+                    'is_delete' => $couponStatusUpdateModel->status ?? false
                 ]);
             });
         } catch (QueryException $e) {

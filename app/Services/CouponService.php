@@ -58,7 +58,7 @@ class CouponService
                     throw new Exception("Invalid coupon");
                 }
                 $coupon->update([
-                    'is_delete' => $couponStatusUpdateModel->status ?? false
+                    'is_delete' => $couponStatusUpdateModel->status
                 ]);
             });
         } catch (QueryException $e) {

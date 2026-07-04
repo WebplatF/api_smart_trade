@@ -223,6 +223,7 @@ class SubscriptionService
                     throw new Exception("Plan not found");
                 }
                 $startDate = Carbon::now();
+                $endDate = Carbon::now();
                 if ($plan->validity == "Years") {
                     $endDate = $startDate->copy()->addYears($plan->duration);
                 } elseif ($plan->validity == "Months") {

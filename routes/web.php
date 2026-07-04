@@ -74,7 +74,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         });
         $router->group(['prefix' => 'coupon'], function () use ($router) {
             $router->get('/list', 'Coupon\CouponController@list');
-            $router->post('/edit', 'Coupon\CouponController@edit');
+            $router->put('/edit', 'Coupon\CouponController@edit');
             $router->patch('/status_update', 'Coupon\CouponController@statusUpdate');
             $router->post('/create', 'Coupon\CouponController@create');
         });

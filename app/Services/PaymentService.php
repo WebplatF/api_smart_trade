@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\TransactionMaster;
@@ -8,9 +9,16 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\QueryException;
 
-class PaymentService{
-    
-    public function orderCreate(int $amount, string $tag,int $userId): OrderResponseModel
+class PaymentService
+{
+    private SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
+    public function orderCreate(int $planId, int $amount, string $tag, int $userId)
     {
         try {
             $paise = (int) round($amount * 100);
@@ -18,50 +26,53 @@ class PaymentService{
             $client = new Client();
             $apikey = config('AppConfig.key_id');
             $secretKey = config('AppConfig.key_secret');
-            $razorResponse = $client->post(
-                'https://api.razorpay.com/v1/orders',
-                [
-                    'auth' => [
-                        $apikey,
-                        $secretKey
-                    ],
+            $userSubscribe = $this->subscriptionService->userSubscription(planId: $planId, imageId: 1, userId: $userId);
+            if ($userSubscribe) {
+                $razorResponse = $client->post(
+                    'https://api.razorpay.com/v1/orders',
+                    [
+                        'auth' => [
+                            $apikey,
+                            $secretKey
+                        ],
 
-                    'headers' => [
-                        'Content-Type' => 'application/json'
-                    ],
+                        'headers' => [
+                            'Content-Type' => 'application/json'
+                        ],
 
-                    'json' => [
-                        'amount'   => $paise,
-                        'currency' => 'INR',
-                        'receipt'  => $uniqueId
-                    ]
-                ]
-            );
-            $statusCode = $razorResponse->getStatusCode();
-            $body = json_decode($razorResponse->getBody(), true);
-            if ($statusCode == 200 || $statusCode == 201) {
-                $trans = TransactionMaster::create([
-                    'user_id' => $userId,
-                    'tag' => $tag,
-                    'receipt' => $uniqueId,
-                    'amount' => $paise,
-                    'order_id' => $body['id'] ?? "",
-                    'status' => "Order Created"
-                ]);
-                $response = new OrderResponseModel(
-                    orderId: $body['id'],
-                    amount: $paise,
-                    apiKey: $apikey,
-                    receipt: $uniqueId,
-                    paymentMethod: [
-                        'upi' => true,
-                        'card' => true,
-                        'netbanking' => true,
+                        'json' => [
+                            'amount'   => $paise,
+                            'currency' => 'INR',
+                            'receipt'  => $uniqueId
+                        ]
                     ]
                 );
-                return $response;
-            } else {
-                throw new Exception('description' . $body['description'] ?? "" . ',reason' . $body['reason'] ?? "");
+                $statusCode = $razorResponse->getStatusCode();
+                $body = json_decode($razorResponse->getBody(), true);
+                if ($statusCode == 200 || $statusCode == 201) {
+                    $trans = TransactionMaster::create([
+                        'user_id' => $userId,
+                        'tag' => $tag,
+                        'receipt' => $uniqueId,
+                        'amount' => $paise,
+                        'order_id' => $body['id'] ?? "",
+                        'status' => "Order Created"
+                    ]);
+                    $response = new OrderResponseModel(
+                        orderId: $body['id'],
+                        amount: $paise,
+                        apiKey: $apikey,
+                        receipt: $uniqueId,
+                        paymentMethod: [
+                            'upi' => true,
+                            'card' => true,
+                            'netbanking' => true,
+                        ]
+                    );
+                    return $response;
+                } else {
+                    throw new Exception('description' . $body['description'] ?? "" . ',reason' . $body['reason'] ?? "");
+                }
             }
         } catch (RequestException $e) {
             $body = json_decode($e->getResponse()->getBody(), true);

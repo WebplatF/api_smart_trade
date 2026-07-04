@@ -27,14 +27,16 @@ class PaymentController extends Controller
             $userId = $request->get('user_id');
             $Validator = Validator::make($request->all(), [
                 'amount' => 'required|strict_string',
+                'plan_id' => 'required|strict_int',
                 'tag' => 'required|strict_string'
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
             $amount = (int)$request->get('amount');
+            $planId = (int)$request->get('plan_id');
             $tag = $request->get('tag');
-            $response = $this->paymentService->orderCreate(amount: $amount, userId: $userId, tag: $tag);
+            $response = $this->paymentService->orderCreate(amount: $amount, userId: $userId, tag: $tag, planId: $planId);
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);
         } catch (Throwable $e) {
             Log::error($e->getMessage());
@@ -68,28 +70,28 @@ class PaymentController extends Controller
     public function updatePaymentDetails($data)
     {
         // try {
-            // $orderId = $data['']
-            // $transaction = TransactionMaster::where('order_id', $orderId)->first();
-            // if (!$transaction) {
-            //     throw new Exception("Order is not created for this profile.");
-            // } else {
-            //     $transaction->update([
-            //         'status' => "Completed",
-            //         'razorypay_order_id' => $razorOrderId,
-            //         'razorypay_payment_id' => $paymentId,
-            //         'razorypay_signature' => $signature
-            //     ]);
-            //     UnlockProfile::create([
-            //         'user_id' => $userId,
-            //         'profile_id' => $profileId
-            //     ]);
-            //     $this->sendSMSMessage(
-            //         mobile: $profile->phone,
-            //         tag: 'matrimony_profile_view',
-            //         name: $profile->first_name . $profile->last_name,
-            //         profileId: $user->profile_id
-            //     );
-            //     return true;
+        // $orderId = $data['']
+        // $transaction = TransactionMaster::where('order_id', $orderId)->first();
+        // if (!$transaction) {
+        //     throw new Exception("Order is not created for this profile.");
+        // } else {
+        //     $transaction->update([
+        //         'status' => "Completed",
+        //         'razorypay_order_id' => $razorOrderId,
+        //         'razorypay_payment_id' => $paymentId,
+        //         'razorypay_signature' => $signature
+        //     ]);
+        //     UnlockProfile::create([
+        //         'user_id' => $userId,
+        //         'profile_id' => $profileId
+        //     ]);
+        //     $this->sendSMSMessage(
+        //         mobile: $profile->phone,
+        //         tag: 'matrimony_profile_view',
+        //         name: $profile->first_name . $profile->last_name,
+        //         profileId: $user->profile_id
+        //     );
+        //     return true;
         //     }
         // } catch (Exception $e) {
         //     throw new Exception($e->getMessage());

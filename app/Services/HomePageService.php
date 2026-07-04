@@ -172,12 +172,14 @@ class HomePageService
             foreach ($queryData as $item) {
                 if ($item->type === 'image' && $item->image) {
                     $response['banner'][] = [
+                        'id' => $item->id,
                         'title' => $item->title,
                         'path' => $item->image->media_url
                     ];
                 }
                 if ($item->type === 'video' && $item->video) {
                     $response['demo_videos'][] = [
+                        'id' => $item->id,
                         'title' => $item->title,
                         'video_id' => $item->video->video_id,
                         'thumbnail' => $item->video->thumbnail->media_url
@@ -186,6 +188,7 @@ class HomePageService
             }
             foreach ($weeklyMeeting as $item) {
                 $response['weekly_meeting'][] = [
+                    'id' => $item->id,
                     'title' => $item->title,
                     'video_id' => $item->video->video_id,
                     'thumbnail' => $item->video->thumbnail->media_url

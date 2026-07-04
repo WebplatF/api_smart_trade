@@ -17,7 +17,7 @@ $router->get('/', function () use ($router) {
     return "Api is live";
 });
 
-$router->group(['prefix' => 'payment','middleware' => 'payment'], function () use ($router) {
+$router->group(['prefix' => 'payment', 'middleware' => 'payment'], function () use ($router) {
     $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
 
@@ -71,6 +71,12 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/edit', 'Admin\CourseController@courseEdit');
             $router->post('/lesson_edit', 'Admin\CourseController@courseDetailEdit');
             $router->post('/action', 'Admin\CourseController@courseActions');
+        });
+        $router->group(['prefix' => 'coupon'], function () use ($router) {
+            $router->get('/list', 'Coupon\CouponController@list');
+            $router->post('/edit', 'Coupon\CouponController@edit');
+            $router->patch('/status_update', 'Coupon\CouponController@statusUpdate');
+            $router->post('/create', 'Coupon\CouponController@create');
         });
     });
 });

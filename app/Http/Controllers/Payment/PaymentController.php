@@ -35,7 +35,7 @@ class PaymentController extends Controller
             }
             $amount = (int)$request->get('amount');
             $planId = (int)$request->get('plan_id');
-            $code = $request->get('code');
+            $code = $request->get('code' ?? "");
             $tag = $request->get('tag');
             $response = $this->paymentService->orderCreate(code:$code,amount: $amount, userId: $userId, tag: $tag, planId: $planId);
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);

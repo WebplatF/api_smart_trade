@@ -8,7 +8,7 @@ return [
     'wasabi_region' => env('WASABI_REGION', 'ap-southeast-1'),
     'wasabi_bucket' => env('WASABI_BUCKET', 'smarttrade'),
     'wasabi_endpoint' => env('WASABI_ENDPOINT', 'https://s3.ap-southeast-1.wasabisys.com'),
-    'key_id' => env('KEY_ID', 'rzp_test_T8ytkbkb1bb4lJ'),
-    'key_secret' => env('KEY_SECRET', 'XKtwN1mDUMd6JSJb3sh6qsd6'),
+    'key_id' => env('KEY_ID', 'rzp_live_T9t2qGi9zsZGWA'),
+    'key_secret' => env('KEY_SECRET', 'upO6gt9zLiZIjVqf64uotTXr'),
     'payment_secret' => env('PAYMENT_SECRET', 'WebSmart')
 ];

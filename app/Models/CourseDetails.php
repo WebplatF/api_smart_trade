@@ -16,7 +16,7 @@ class CourseDetails extends Model
 
     public function videos()
     {
-        return $this->hasMany(CourseVideos::class, 'detail_id');
+        return $this->hasMany(CourseVideos::class, 'detail_id')->where('is_delete', 0);
     }
 
     public function courseMaster()

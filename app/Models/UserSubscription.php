@@ -22,6 +22,7 @@ class UserSubscription extends Model
         'renew_date',
         'image_id',
         'coupon',
+        'order_id',
         'status'
     ];
 

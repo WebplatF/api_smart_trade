@@ -144,7 +144,12 @@ class SubscriptionService
                 ->first();
             if ($subscriptions) {
                 if ($subscriptions->status == 'pending') {
-                    throw new Exception('Already this subscription waiting for admin approval');
+                    // throw new Exception('Already this subscription waiting for admin approval');
+                     return  [
+                        "id" => $subscriptions->id,
+                        "status" => $subscriptions->status ?? "pending"
+                    ];
+                    
                 }
                 if ($subscriptions->status == 'approved') {
                     throw new Exception('Already subscription is available renewable from admin');

@@ -37,7 +37,7 @@ class PaymentController extends Controller
             $planId = (int)$request->get('plan_id');
             $code = $request->get('code' ?? "");
             $tag = $request->get('tag');
-            $response = $this->paymentService->orderCreate(code:$code,amount: $amount, userId: $userId, tag: $tag, planId: $planId);
+            $response = $this->paymentService->orderCreate(code: $code, amount: $amount, userId: $userId, tag: $tag, planId: $planId);
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);
         } catch (Throwable $e) {
             Log::error($e->getMessage());
@@ -51,51 +51,17 @@ class PaymentController extends Controller
             $payload = $request->getContent();
             $data = json_decode($payload, true);
             $event = $data['event'];
-            Log::info($event);
             switch ($event) {
                 case 'payment.authorized':
                     // Handle authorized payment
-                    $this->updatePaymentDetails($data);
+                    $this->paymentService->updatePaymentDetails(data:$data);
                     break;
-
                 case 'payment.captured':
-                    // Update DB
-                    // Activate subscription
+                    $this->paymentService->processSubscription(data: $data);
                     break;
             }
         } catch (Throwable $e) {
             Log::error($e->getMessage());
         }
-    }
-
-    public function updatePaymentDetails($data)
-    {
-        // try {
-        // $orderId = $data['']
-        // $transaction = TransactionMaster::where('order_id', $orderId)->first();
-        // if (!$transaction) {
-        //     throw new Exception("Order is not created for this profile.");
-        // } else {
-        //     $transaction->update([
-        //         'status' => "Completed",
-        //         'razorypay_order_id' => $razorOrderId,
-        //         'razorypay_payment_id' => $paymentId,
-        //         'razorypay_signature' => $signature
-        //     ]);
-        //     UnlockProfile::create([
-        //         'user_id' => $userId,
-        //         'profile_id' => $profileId
-        //     ]);
-        //     $this->sendSMSMessage(
-        //         mobile: $profile->phone,
-        //         tag: 'matrimony_profile_view',
-        //         name: $profile->first_name . $profile->last_name,
-        //         profileId: $user->profile_id
-        //     );
-        //     return true;
-        //     }
-        // } catch (Exception $e) {
-        //     throw new Exception($e->getMessage());
-        // }
     }
 }

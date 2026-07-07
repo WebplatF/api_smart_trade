@@ -129,23 +129,52 @@ class CourseService
      * @return array $courseDetails
      * @throws Exception
      */
-    public function mapCourseVideo(int $detailId, int $videoId, int $thumbnailId,string $title)
+    public function mapCourseVideo(int $detailId, int $videoId, int $thumbnailId, string $title)
     {
         try {
             $course = CourseVideos::create([
                 'detail_id' => $detailId,
                 'video_id' => $videoId,
-                 'title' => $title,
+                'title' => $title,
                 'thumbnail_id' => $thumbnailId
             ]);
             $return = CourseVideos::with('image', 'video')->find($course->id);
             return [
                 'id' => $course->id,
                 'detail_id' => $detailId,
-                 'title' => $title,
+                'title' => $title,
                 'video_id' => $videoId ?? "",
                 'video_path' => $return->video != null ?  $return->video->video_id ?? "" : "",
                 'thumbnail_id' => $thumbnailId,
+                'thumbnail_url' => $return->image->media_url ?? "",
+            ];
+        } catch (QueryException $e) {
+            throw new Exception("Course Video Creation Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Course Video Creation Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * @param string $title
+     * @param int $videoId
+     * @throws Exception
+     */
+    public function mapCourseTitleEdit(int $videoId,string $title)
+    {
+        try {
+            $course = CourseVideos::where('is_delete',0)->where('id',$videoId)->first();
+            if(!$course){
+                throw new Exception("Course video invalid");
+            }
+            $course->unpate([
+                'titile' => $title
+            ]);
+            $return = CourseVideos::with('image', 'video')->find($course->id);
+            return [
+                'id' => $course->id,
+                'title' => $title,
+                'video_id' => $videoId ?? "",
+                'video_path' => $return->video != null ?  $return->video->video_id ?? "" : "",
                 'thumbnail_url' => $return->image->media_url ?? "",
             ];
         } catch (QueryException $e) {
@@ -161,7 +190,7 @@ class CourseService
     public function courseList()
     {
         try {
-            $course = CourseMaster::with('image')->where('is_delete',0)->get();
+            $course = CourseMaster::with('image')->where('is_delete', 0)->get();
             return CourseMasterResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
@@ -176,7 +205,7 @@ class CourseService
     public function courseLessonList(int $courseId)
     {
         try {
-            $course = CourseDetails::withCount('videos')->where('is_delete',0)->where('course_id', $courseId)->get();
+            $course = CourseDetails::withCount('videos')->where('is_delete', 0)->where('course_id', $courseId)->get();
             return CourseLessonResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
@@ -191,12 +220,34 @@ class CourseService
     public function lessonVideoList(int $detailId)
     {
         try {
-            $course = CourseVideos::with('image', 'video')->where('is_delete',0)->where('detail_id', $detailId)->get();
+            $course = CourseVideos::with('image', 'video')->where('is_delete', 0)->where('detail_id', $detailId)->get();
             return VideoListResources::collection($course);
         } catch (QueryException $e) {
             throw new Exception("Course List Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
             throw new Exception("Course List Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * @return $courseList
+     * @throws Exception
+     */
+    public function lessonVideoStatusUpdate(int $videoId, bool $status)
+    {
+        try {
+            $course = CourseVideos::find($videoId);
+            if (!$course) {
+                throw new Exception("Video is invalid");
+            }
+            $course->update(
+                [
+                    'is_delete' => (bool)$status
+                ]
+            );
+        } catch (QueryException $e) {
+            throw new Exception(($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
     /**
@@ -253,7 +304,7 @@ class CourseService
                     $query->where('user_id', $userId)
                         ->where('subscription_id', $subscriptionId);
                 }
-            ])->where('is_delete',0)->first();
+            ])->where('is_delete', 0)->first();
             if (!$data) {
                 throw new Exception("No Course is available...!");
             }

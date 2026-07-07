@@ -72,6 +72,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/edit', 'Admin\CourseController@courseEdit');
             $router->post('/lesson_edit', 'Admin\CourseController@courseDetailEdit');
             $router->post('/action', 'Admin\CourseController@courseActions');
+            $router->patch('/video_delete', 'Admin\CourseController@lessonVideoStatusUpdate');
+            $router->patch('/video_edit', 'Admin\CourseController@videoTitileEdit');
         });
         $router->group(['prefix' => 'coupon'], function () use ($router) {
             $router->get('/list', 'Coupon\CouponController@list');

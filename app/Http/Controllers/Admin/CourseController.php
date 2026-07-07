@@ -131,6 +131,32 @@ class CourseController extends Controller
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    public function videoTitileEdit(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'title' => 'required|strict_string',
+                'video_id' => 'required|strict_int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $title = $request->get('title');
+            $detailsId = $request->get('video_id');
+            $returnResponse = $this->courseService->mapCourseTitleEdit(title: $title, videoId: $detailsId);
+            return ResponseHelper::successResponse(data: $returnResponse, message: "Lesson Edited Successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function lessonVideoMap(Request $request)
     {
         try {
@@ -139,7 +165,7 @@ class CourseController extends Controller
                 return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
             }
             $Validator = Validator::make($request->all(), [
-                 'title' => 'required|strict_string',
+                'title' => 'required|strict_string',
                 'video_id' => 'required|strict_int',
                 'details_id' => 'required|strict_int',
                 'thumbnail_id' => 'required|strict_int',
@@ -150,7 +176,7 @@ class CourseController extends Controller
             $detailsId = $request->get('details_id');
             $videoId = $request->get('video_id');
             $thumbnailId = $request->get('thumbnail_id');
-           $title = $request->get('title');
+            $title = $request->get('title');
             $returnResponse = $this->courseService->mapCourseVideo(videoId: $videoId, detailId: $detailsId, thumbnailId: $thumbnailId, title: $title);
             return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
         } catch (Throwable $e) {
@@ -212,6 +238,32 @@ class CourseController extends Controller
             }
             $returnResponse = $this->courseService->lessonVideoList(detailId: $detailId);
             return ResponseHelper::successResponse(data: $returnResponse, message: "Lesson Video Successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function lessonVideoStatusUpdate(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'video_id' => 'required|strict_int',
+                'status' => 'required|strict_bool',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $id = $request->get('video_id');
+            $status = $request->get('status');
+            $returnResponse = $this->courseService->lessonVideoStatusUpdate(videoId: $id, status: $status);
+            return ResponseHelper::successResponse(data: $returnResponse, message: "Lesson Video deleted Successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }

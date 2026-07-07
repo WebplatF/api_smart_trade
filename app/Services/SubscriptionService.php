@@ -145,11 +145,10 @@ class SubscriptionService
             if ($subscriptions) {
                 if ($subscriptions->status == 'pending') {
                     // throw new Exception('Already this subscription waiting for admin approval');
-                     return  [
+                    return  [
                         "id" => $subscriptions->id,
                         "status" => $subscriptions->status ?? "pending"
                     ];
-                    
                 }
                 if ($subscriptions->status == 'approved') {
                     throw new Exception('Already subscription is available renewable from admin');
@@ -220,7 +219,9 @@ class SubscriptionService
     public function subscriptionAction(string $action, int $id, string $reason): bool
     {
         try {
-            $user = UserSubscription::find($id);
+            $user = UserSubscription::where('status', '!=', 'approved')
+                ->where('id', $id)
+                ->first();
             if (!$user) {
                 throw new Exception("Subscrition is not found");
             }

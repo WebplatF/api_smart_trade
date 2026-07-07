@@ -51,6 +51,7 @@ class PaymentController extends Controller
             $payload = $request->getContent();
             $data = json_decode($payload, true);
             $event = $data['event'];
+            Log::info($event);
             switch ($event) {
                 case 'payment.authorized':
                     // Handle authorized payment

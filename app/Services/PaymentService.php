@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class PaymentService
 {
@@ -90,6 +91,8 @@ class PaymentService
         try {
             $orderId = $data['payload']['payment']['entity']['order_id'];
             $paymentId    = $data['payload']['payment']['entity']['id'];
+            Log::info($orderId);
+            Log::info($paymentId);
             $transaction = TransactionMaster::where('order_id', $orderId)->first();
             if (!$transaction) {
                 throw new Exception("Order is not created for this profile.");
@@ -124,7 +127,7 @@ class PaymentService
                         'razorypay_payment_id' => $paymentId
                     ]);
                 } else {
-                    $subscription = UserSubscription::where('order_id', $orderId)->where('status','pending')->first();
+                    $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
                     if (!$subscription) {
                         throw new Exception("Invalid order");
                     }

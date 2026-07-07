@@ -58,7 +58,7 @@ class PaymentController extends Controller
                     $this->paymentService->updatePaymentDetails(data:$data);
                     break;
                 case 'payment.captured':
-                    $this->paymentService->processSubscription(data: $data);
+                     $this->paymentService->updatePaymentDetails(data:$data);
                     break;
             }
         } catch (Throwable $e) {

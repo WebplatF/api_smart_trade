@@ -97,12 +97,19 @@ class PaymentService
             if (!$transaction) {
                 throw new Exception("Order is not created for this profile.");
             } else {
+                Log::info($transaction->status);
                 if ($transaction->status !== 'Payment Completed') {
                     $transaction->update([
                         'status' => "Payment Completed",
                         'razorypay_order_id' => $orderId,
                         'razorypay_payment_id' => $paymentId
                     ]);
+                }else{
+                    $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
+                    if (!$subscription) {
+                        throw new Exception("Invalid order");
+                    }
+                    $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
                 }
             }
         } catch (QueryException $e) {

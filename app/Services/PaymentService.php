@@ -98,18 +98,33 @@ class PaymentService
                 throw new Exception("Order is not created for this profile.");
             } else {
                 Log::info($transaction->status);
-                if ($transaction->status !== 'Payment Completed') {
-                    $transaction->update([
-                        'status' => "Payment Completed",
-                        'razorypay_order_id' => $orderId,
-                        'razorypay_payment_id' => $paymentId
-                    ]);
-                }else{
-                    $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
-                    if (!$subscription) {
-                        throw new Exception("Invalid order");
-                    }
-                    $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
+                switch ($transaction->status) {
+                    case "Order Created":
+                        $transaction->update([
+                            'status' => "Payment Pending",
+                            'razorypay_order_id' => $orderId,
+                            'razorypay_payment_id' => $paymentId
+                        ]);
+                    break;    
+                    case "Payment Pending":
+                        $transaction->update([
+                            'status' => "Payment Completed",
+                            'razorypay_order_id' => $orderId,
+                            'razorypay_payment_id' => $paymentId
+                        ]);
+                        $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
+                        if (!$subscription) {
+                            throw new Exception("Invalid order");
+                        }
+                        $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
+                    break; 
+                    case "Payment Completed":
+                        $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
+                        if (!$subscription) {
+                            throw new Exception("Invalid order");
+                        }
+                        $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
+                    break;    
                 }
             }
         } catch (QueryException $e) {

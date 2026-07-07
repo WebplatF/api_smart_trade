@@ -91,8 +91,6 @@ class PaymentService
         try {
             $orderId = $data['payload']['payment']['entity']['order_id'];
             $paymentId    = $data['payload']['payment']['entity']['id'];
-            Log::info($orderId);
-            Log::info($paymentId);
             $transaction = TransactionMaster::where('order_id', $orderId)->first();
             if (!$transaction) {
                 throw new Exception("Order is not created for this profile.");
@@ -102,15 +100,15 @@ class PaymentService
                     case "Order Created":
                         $transaction->update([
                             'status' => "Payment Pending",
-                            'razorypay_order_id' => $orderId,
-                            'razorypay_payment_id' => $paymentId
+                            'payment_order_id' => $orderId,
+                            'payment_id' => $paymentId
                         ]);
                     break;    
                     case "Payment Pending":
                         $transaction->update([
                             'status' => "Payment Completed",
-                            'razorypay_order_id' => $orderId,
-                            'razorypay_payment_id' => $paymentId
+                            'payment_order_id' => $orderId,
+                            'payment_id' => $paymentId
                         ]);
                         $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
                         if (!$subscription) {

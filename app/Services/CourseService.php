@@ -166,7 +166,7 @@ class CourseService
             if(!$course){
                 throw new Exception("Course video invalid");
             }
-            $course->unpate([
+            $course->update([
                 'titile' => $title
             ]);
             $return = CourseVideos::with('image', 'video')->find($course->id);

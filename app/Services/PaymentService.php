@@ -124,7 +124,7 @@ class PaymentService
                         'razorypay_payment_id' => $paymentId
                     ]);
                 } else {
-                    $subscription = UserSubscription::where('order_id', $orderId)->where('status',)->first();
+                    $subscription = UserSubscription::where('order_id', $orderId)->where('status','pending')->first();
                     if (!$subscription) {
                         throw new Exception("Invalid order");
                     }

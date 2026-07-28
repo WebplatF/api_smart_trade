@@ -123,6 +123,7 @@ class UserService
                 'subscription',
                 'image'
             ])->where('user_id', $userId)
+                ->where('status', 'approved')
                 ->where('is_delete', 0)
                 ->latest()
                 ->first();
@@ -202,7 +203,7 @@ class UserService
             $watchHistory = WatchHistory::where('user_id', $userId)
                 ->where('video_id', $videoId)
                 ->where('subscription_id', $subscriptionId)->first();
-            
+
             $watchHistory->update([
                 'last_time_stamp' => $duration,
                 'is_watch' => true,

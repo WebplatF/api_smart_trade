@@ -65,36 +65,38 @@ class WalletService
     public function walleteCreation(int $userId, string $date, float $amount)
     {
         try {
-            $wallet = Wallet::where('user_id', $userId)
-                ->where('is_delete', 0)
-                ->first();
-            if (!$wallet) {
-                $timestamp = Carbon::parse($date)->startOfDay();
-                $walletAmount = 0.00;
-                if ($amount > 0) {
-                    $walletAmount = $amount;
-                } elseif ($amount < 0) {
-                    throw new Exception("Amount cannot be negative.");
+            DB::transaction(function () use ($userId, $date, $amount) {
+                $wallet = Wallet::where('user_id', $userId)
+                    ->where('is_delete', 0)
+                    ->first();
+                if (!$wallet) {
+                    $timestamp = Carbon::parse($date)->startOfDay();
+                    $walletAmount = 0.00;
+                    if ($amount > 0) {
+                        $walletAmount = $amount;
+                    } elseif ($amount < 0) {
+                        throw new Exception("Amount cannot be negative.");
+                    }
+                    $userWallet = Wallet::create([
+                        'user_id' => $userId,
+                        'amount' => $walletAmount,
+                        'wallet_create_date' => $timestamp,
+                    ]);
+                    if ($walletAmount > 0.00) {
+                        $this->PaymentLogsActions(
+                            amount: $amount,
+                            balance: $userWallet->amount,
+                            walletId: $userWallet->id,
+                            action: "DEPOSIT",
+                            description: "Amount Deposited"
+                        );
+                    }
+                    $data = WalletResources::make($userWallet);
+                    return $data->resolve();
+                } else {
+                    throw new Exception("User have wallet already");
                 }
-                $userWallet = Wallet::create([
-                    'user_id' => $userId,
-                    'amount' => $walletAmount,
-                    'wallet_create_date' => $timestamp,
-                ]);
-                if ($walletAmount > 0.00) {
-                    $this->PaymentLogsActions(
-                        amount: $amount,
-                        balance: $userWallet->amount,
-                        walletId: $wallet->id,
-                        action: "DEPOSIT",
-                        description: "Amount Deposited"
-                    );
-                }
-                $data = WalletResources::make($userWallet);
-                return $data->resolve();
-            } else {
-                throw new Exception("User have wallet already");
-            }
+            });
         } catch (QueryException $e) {
             throw new Exception('Wallet creation Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {

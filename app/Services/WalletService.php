@@ -81,7 +81,7 @@ class WalletService
                     'amount' => $walletAmount,
                     'wallet_create_date' => $timestamp,
                 ]);
-                if ($amount > 0) {
+                if ($walletAmount > 0.00) {
                     $this->PaymentLogsActions(
                         amount: $amount,
                         balance: $userWallet->amount,

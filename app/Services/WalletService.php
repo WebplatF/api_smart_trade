@@ -69,31 +69,32 @@ class WalletService
                 ->where('is_delete', 0)
                 ->first();
             if (!$wallet) {
-                throw new Exception("User wallet not found");
+                $timestamp = Carbon::parse($date)->startOfDay();
+                $walletAmount = 0.00;
+                if ($amount > 0) {
+                    $walletAmount = $amount;
+                } elseif ($amount < 0) {
+                    throw new Exception("Amount cannot be negative.");
+                }
+                $userWallet = Wallet::create([
+                    'user_id' => $userId,
+                    'amount' => $walletAmount,
+                    'wallet_create_date' => $timestamp,
+                ]);
+                if ($amount > 0) {
+                    $this->PaymentLogsActions(
+                        amount: $amount,
+                        balance: $userWallet->amount,
+                        walletId: $wallet->id,
+                        action: "DEPOSIT",
+                        description: "Amount Deposited"
+                    );
+                }
+                $data = WalletResources::make($userWallet);
+                return $data->resolve();
+            } else {
+                throw new Exception("User have wallet already");
             }
-            $timestamp = Carbon::parse($date)->startOfDay();
-            $walletAmount = 0.00;
-            if ($amount > 0) {
-                $walletAmount = $amount;
-            } elseif ($amount < 0) {
-                throw new Exception("Amount cannot be negative.");
-            }
-            $userWallet = Wallet::create([
-                'user_id' => $userId,
-                'amount' => $walletAmount,
-                'wallet_create_date' => $timestamp,
-            ]);
-            if ($amount > 0) {
-                $this->PaymentLogsActions(
-                    amount: $amount,
-                    balance: $userWallet->amount,
-                    walletId: $wallet->id,
-                    action: "DEPOSIT",
-                    description: "Amount Deposited"
-                );
-            }
-            $data = WalletResources::make($userWallet);
-            return $data->resolve();
         } catch (QueryException $e) {
             throw new Exception('Wallet creation Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
@@ -161,7 +162,7 @@ class WalletService
         }
     }
 
-    private function deposite(int $userId, float $amount) : object
+    private function deposite(int $userId, float $amount): object
     {
         try {
             if ($amount <= 0) {
@@ -200,7 +201,7 @@ class WalletService
         }
     }
 
-    private function widthdraw(int $userId, float $amount) : object
+    private function widthdraw(int $userId, float $amount): object
     {
         try {
             if ($amount <= 0) {

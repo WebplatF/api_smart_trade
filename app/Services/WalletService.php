@@ -1,0 +1,241 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\PaymentLogs;
+use App\Models\Wallet;
+use App\Resources\PaymentLogsResources;
+use App\Resources\WalletResources;
+use App\ResponseModel\CommonListResponseModel;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+
+class WalletService
+{
+    /**
+     * Get User Wallet
+     * @param int $userId
+     * @return array
+     */
+    public function getWallet(int $userId): array
+    {
+        try {
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('is_delete', 0)
+                ->first();
+            if (!$wallet) {
+                throw new Exception("User wallet not found");
+            }
+            $data = WalletResources::make($wallet);
+            return $data->resolve();
+        } catch (QueryException $e) {
+            throw new Exception('Wallet create Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Wallet create Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Get user Payment Logs
+     * @param int $walletId
+     * @return CommonListResponseModel
+     */
+    public function getPaymentLogs(int $walletId): CommonListResponseModel
+    {
+        try {
+            $logs = PaymentLogs::where('wallet_id', $walletId)->paginate(15);
+            $history = PaymentLogsResources::collection($logs)->resolve();
+            return new CommonListResponseModel(
+                totalRecords: $logs->total(),
+                currentPage: $logs->currentPage(),
+                dataList: $history
+            );
+        } catch (QueryException $e) {
+            throw new Exception('Payment Logs Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Payment Logs Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Wallet Creation
+     *
+     * @return object
+     */
+    public function walleteCreation(int $userId, string $date, float $amount)
+    {
+        try {
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('is_delete', 0)
+                ->first();
+            if (!$wallet) {
+                throw new Exception("User wallet not found");
+            }
+            $timestamp = Carbon::parse($date)->startOfDay();
+            $walletAmount = 0.00;
+            if ($amount > 0) {
+                $walletAmount = $amount;
+            } elseif ($amount < 0) {
+                throw new Exception("Amount cannot be negative.");
+            }
+            $userWallet = Wallet::create([
+                'user_id' => $userId,
+                'amount' => $walletAmount,
+                'wallet_create_date' => $timestamp,
+            ]);
+            if ($amount > 0) {
+                $this->PaymentLogsActions(
+                    amount: $amount,
+                    balance: $userWallet->amount,
+                    walletId: $wallet->id,
+                    action: "DEPOSIT",
+                    description: "Amount Deposited"
+                );
+            }
+            $data = WalletResources::make($userWallet);
+            return $data->resolve();
+        } catch (QueryException $e) {
+            throw new Exception('Wallet creation Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Wallet creation Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Wallet Actions
+     *
+     * @return object
+     */
+    public function walleteAction(int $userId, string $action, float $amount)
+    {
+        try {
+            $wallet = match ($action) {
+                'deposite' => $this->deposite(userId: $userId, amount: $amount),
+                'withdraw' => $this->widthdraw(userId: $userId, amount: $amount),
+                default => throw new Exception("Invalid actions"),
+            };
+            return $wallet;
+        } catch (QueryException $e) {
+            throw new Exception('Wallet action Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Wallet action Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Payment Logs Actions
+     *
+     * @param float $amount
+     * @param float $balance
+     * @param integer $walletId
+     * @param string $action
+     * @param string $description
+     * @return object
+     */
+    private function PaymentLogsActions(
+        float $amount,
+        float $balance,
+        int $walletId,
+        string $action,
+        string $description
+    ): object {
+        try {
+            return DB::transaction(function () use (
+                $amount,
+                $balance,
+                $walletId,
+                $action,
+                $description
+            ) {
+                $log = PaymentLogs::create([
+                    'wallet_id' => $walletId,
+                    'description' => $description ?? "",
+                    'amount' => $amount,
+                    'action' => $action,
+                    'balance' => $balance,
+                ]);
+                return $log;
+            });
+        } catch (QueryException $e) {
+            throw new Exception('Payment logs action Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Payment logs Failed :" . $e->getMessage());
+        }
+    }
+
+    private function deposite(int $userId, float $amount) : object
+    {
+        try {
+            if ($amount <= 0) {
+                throw new Exception("Amount must be greater than zero.");
+            }
+            return DB::transaction(function () use ($userId, $amount) {
+                $wallet = Wallet::where('user_id', $userId)
+                    ->where('is_delete', 0)
+                    ->first();
+                if (!$wallet) {
+                    throw new Exception("User wallet not found");
+                }
+                $wallet->lockForUpdate();
+                $wallet->update([
+                    'amount' => bcadd($wallet->amount, $amount, 2),
+                ]);
+                $history = $this->PaymentLogsActions(
+                    amount: $amount,
+                    balance: $wallet->amount,
+                    walletId: $wallet->id,
+                    action: "DEPOSIT",
+                    description: "Amount Deposited to account"
+                );
+                return [
+                    'id' => $history->id,
+                    'amount' => $history->amount,
+                    'balance' => $history->balance,
+                    'action' => $history->action,
+                    'description' => $history->description
+                ];
+            });
+        } catch (QueryException $e) {
+            throw new Exception('Wallet deposite Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Wallet deposite Failed :" . $e->getMessage());
+        }
+    }
+
+    private function widthdraw(int $userId, float $amount) : object
+    {
+        try {
+            if ($amount <= 0) {
+                throw new Exception("Amount must be greater than zero.");
+            }
+            return DB::transaction(function () use ($userId, $amount) {
+                $wallet = Wallet::where('user_id', $userId)
+                    ->where('is_delete', 0)
+                    ->first();
+                if (!$wallet) {
+                    throw new Exception("User wallet not found");
+                }
+                $wallet->lockForUpdate();
+                $wallet->update([
+                    'amount' => bcsub($wallet->amount, $amount, 2),
+                ]);
+                $history = $this->PaymentLogsActions(
+                    amount: $amount,
+                    balance: $wallet->amount,
+                    walletId: $wallet->id,
+                    action: "WITHDRAW",
+                    description: "Amount widthdraw from account"
+                );
+                return [
+                    'id' => $history->id,
+                    'amount' => $history->amount,
+                    'balance' => $history->balance,
+                    'action' => $history->action,
+                    'description' => $history->description
+                ];
+            });
+        } catch (QueryException $e) {
+            throw new Exception('Wallet withdraw Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Wallet withdraw Failed :" . $e->getMessage());
+        }
+    }
+}

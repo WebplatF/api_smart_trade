@@ -19,6 +19,9 @@ class ValidationServiceProvider extends ServiceProvider
         Validator::extend('strict_bool', function ($attribute, $value) {
             return is_bool($value);
         }, 'The :attribute  must be a boolean.');
+        Validator::extend('strict_float', function ($attribute, $value) {
+            return is_float($value);
+        }, 'The :attribute  must be a float.');
         Validator::extend('array_of_strings', function ($attribute, $value) {
             if (!is_array($value)) return false;
             foreach ($value as $v) {

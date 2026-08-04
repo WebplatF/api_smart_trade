@@ -49,7 +49,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->get('/wallet', 'Wallet\WalletController@getWallet');
         $router->post('/wallet/create', 'Wallet\WalletController@walleteCreation');
         $router->post('/wallet/action', 'Wallet\WalletController@walleteAction');
-        $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
+        // $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

@@ -65,7 +65,7 @@ class WalletService
     public function walleteCreation(int $userId, string $date, float $amount)
     {
         try {
-            DB::transaction(function () use ($userId, $date, $amount) {
+           return DB::transaction(function () use ($userId, $date, $amount) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
                     ->first();

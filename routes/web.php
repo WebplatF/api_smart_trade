@@ -46,8 +46,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->post('/video_status', ['middleware' => 'token', 'uses' => 'User\UserController@videoUpdate']);
     $router->get('/apply_coupon', ['middleware' => 'token', 'uses' => 'Coupon\CouponController@applyCoupon']);
     $router->group(['prefix' => 'journal', 'middleware' => 'token'], function () use ($router) {
-        $router->get('/trade/create', 'Trade\TradeController@create');
-        $router->get('/trade/edit', 'Trade\TradeController@edit');
+        $router->post('/trade/create', 'Trade\TradeController@create');
+        $router->post('/trade/edit', 'Trade\TradeController@edit');
         $router->get('/wallet', 'Wallet\WalletController@getWallet');
         $router->post('/wallet/create', 'Wallet\WalletController@walleteCreation');
         $router->post('/wallet/action', 'Wallet\WalletController@walleteAction');

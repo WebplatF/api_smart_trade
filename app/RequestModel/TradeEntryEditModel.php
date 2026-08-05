@@ -41,7 +41,7 @@ class TradeEntryEditModel
             'take_profit' => 'required|strict_number',
             'exit_price' => 'required|strict_number',
             'points_captured' => 'required|strict_number',
-            'win_loss' => 'required|strict_strict',
+            'win_loss' => 'required|strict_string',
             'risk_reward' => 'required|strict_number',
         ]);
         if ($validate->fails()) {

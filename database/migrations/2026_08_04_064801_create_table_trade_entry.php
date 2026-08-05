@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('reason', 20)->nullable();
             $table->decimal('profit', 10, 2)->nullable();
             $table->decimal('loss', 10, 2)->nullable();
-            $table->string('remark', 20);
+            $table->string('remark', 20)->nullable();
             $table->boolean('is_delete')->default(false);
             $table->timestamps();
             $table->foreign('wallet_id')->references('id')->on('Wallet')->cascadeOnDelete();

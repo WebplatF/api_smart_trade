@@ -6,9 +6,10 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class TradeEntryCreateModel
+class TradeEntryEditModel
 {
     public function __construct(
+        public int $tradeId,
         public int $walletId,
         public string $date,
         public string $pair,
@@ -29,6 +30,7 @@ class TradeEntryCreateModel
     public static function fromRequest(Request $request): self
     {
         $validate = Validator::make($request->all(), [
+            'trade_id' => 'required|strict_int',
             'wallet_id' => 'required|strict_int',
             'date' => 'required|strict_string',
             'pair' => 'required|strict_string',
@@ -50,6 +52,7 @@ class TradeEntryCreateModel
     public static function fromArray(array $data): self
     {
         return new self(
+            tradeId: $data['trade_id'],
             walletId: $data['wallet_id'],
             date: $data['date'],
             pair: $data['pair'],
@@ -62,10 +65,10 @@ class TradeEntryCreateModel
             pointsCaptured: $data['points_captured'],
             winLoss: $data['win_loss'],
             riskReward: $data['risk_reward'],
-            reason: $data['reason'] ?? "",
-            profit: $data['profit'] ?? 0.0,
-            loss: $data['loss'] ?? 0.0,
-            remark: $data['remark'] ?? "",
+            reason: $data['reason'],
+            profit: $data['profit'],
+            loss: $data['loss'],
+            remark: $data['remark'],
         );
     }
 }

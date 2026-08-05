@@ -26,7 +26,7 @@ return new class extends Migration
             $table->decimal('exit_price', 10, 2);
             $table->decimal('points_captured', 10, 2);
             $table->enum('win_loss', ['WIN', 'LOSS'])->index();
-            $table->string('risk_reward', 10);
+            $table->decimal('risk_reward', 10,2);
             $table->string('reason', 20)->nullable();
             $table->decimal('profit', 10, 2)->nullable();
             $table->decimal('loss', 10, 2)->nullable();

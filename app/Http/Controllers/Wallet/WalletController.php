@@ -46,7 +46,7 @@ class WalletController extends Controller
         try {
             $walletId = (int)$id;
             $logs = $this->walletService->getPaymentLogs(walletId: $walletId);
-            return ResponseHelper::successResponse(data: $logs, message: "Payment history arrived successfully...!", code: 200);
+            return ResponseHelper::successResponse(data: $logs->toArray(), message: "Payment history arrived successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

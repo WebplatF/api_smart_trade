@@ -87,4 +87,16 @@ class TradeEntryService
             throw new Exception("Trade entry edit Failed :" . $e->getMessage());
         }
     }
+    public function list(): array
+    {
+        try {
+            $tradeEntry = TradeEntry::where('is_delete',0)->paginate(15);
+            
+            return [];
+        } catch (QueryException $e) {
+            throw new Exception('Trade entry list Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Trade entry list Failed :" . $e->getMessage());
+        }
+    }
 }

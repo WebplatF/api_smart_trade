@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\TradeEntry;
 use App\RequestModel\TradeEntryCreateModel;
 use App\RequestModel\TradeEntryEditModel;
+use App\Resources\TradeEntryResources;
+use App\ResponseModel\CommonListResponseModel;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -87,12 +89,22 @@ class TradeEntryService
             throw new Exception("Trade entry edit Failed :" . $e->getMessage());
         }
     }
-    public function list(): array
+    /**
+     * Trade Entry List
+     *
+     * @param integer $walletId
+     * @return CommonListResponseModel
+     */
+    public function list(int $walletId): CommonListResponseModel
     {
         try {
-            $tradeEntry = TradeEntry::where('is_delete',0)->paginate(15);
-            
-            return [];
+            $tradeEntry = TradeEntry::where('wallet_id',$walletId)->where('is_delete', 0)->paginate(15);
+            $tradeList = TradeEntryResources::collection($tradeEntry)->resolve();
+            return new CommonListResponseModel(
+                totalRecords: $tradeEntry->total(),
+                currentPage: $tradeEntry->currentPage(),
+                dataList: $tradeList
+            );
         } catch (QueryException $e) {
             throw new Exception('Trade entry list Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {

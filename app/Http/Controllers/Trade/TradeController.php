@@ -29,8 +29,8 @@ class TradeController extends Controller
     {
         try {
             $tradeEntryCreate = TradeEntryCreateModel::fromRequest(request: $request);
-            $this->tradeEntryService->create(tradeEntryCreateModel: $tradeEntryCreate);
-            return ResponseHelper::successResponse(message: "Trade entry created successfully...!");
+            $create = $this->tradeEntryService->create(tradeEntryCreateModel: $tradeEntryCreate);
+            return ResponseHelper::successResponse(data: $create, message: "Trade entry created successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
@@ -45,8 +45,24 @@ class TradeController extends Controller
     {
         try {
             $tradeEntryEdit = TradeEntryEditModel::fromRequest(request: $request);
-            $this->tradeEntryService->edit(tradeEntryEditModel: $tradeEntryEdit);
-            return ResponseHelper::successResponse(message: "Trade entry edited successfully...!");
+            $edit = $this->tradeEntryService->edit(tradeEntryEditModel: $tradeEntryEdit);
+            return ResponseHelper::successResponse(data: $edit, message: "Trade entry edited successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * Trade Entry Edit
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function list(int $id)
+    {
+        try {
+            $walletId = (int)$id;
+            $tradeEntry = $this->tradeEntryService->list(walletId: $walletId);
+            return ResponseHelper::successResponse(data: $tradeEntry->toArray(), message: "Trade entry list arrived successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }

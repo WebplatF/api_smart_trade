@@ -188,7 +188,7 @@ class WalletService
                     action: "DEPOSIT",
                     description: "Amount Deposited to account"
                 );
-                return [
+                return (object)[
                     'id' => $history->id,
                     'amount' => $history->amount,
                     'balance' => $history->balance,
@@ -227,7 +227,7 @@ class WalletService
                     action: "WITHDRAW",
                     description: "Amount widthdraw from account"
                 );
-                return [
+                return (object)[
                     'id' => $history->id,
                     'amount' => $history->amount,
                     'balance' => $history->balance,

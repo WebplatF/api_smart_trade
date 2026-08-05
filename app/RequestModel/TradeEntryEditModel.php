@@ -47,7 +47,7 @@ class TradeEntryEditModel
         if ($validate->fails()) {
             throw new Exception($validate->errors()->first());
         }
-        return self::fromArray($validate->all());
+        return self::fromArray($request->all());
     }
     public static function fromArray(array $data): self
     {

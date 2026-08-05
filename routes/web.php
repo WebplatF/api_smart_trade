@@ -52,6 +52,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->post('/wallet/create', 'Wallet\WalletController@walleteCreation');
         $router->post('/wallet/action', 'Wallet\WalletController@walleteAction');
         $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
+        $router->get('/trade/{id}', 'Trade\TradeController@list');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

@@ -236,9 +236,9 @@ class WalletService
                 ];
             });
         } catch (QueryException $e) {
-            throw new Exception('Wallet withdraw Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw new Exception(($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
-            throw new Exception("Wallet withdraw Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
-    }
+    } 
 }

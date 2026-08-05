@@ -87,7 +87,7 @@ class WalletController extends Controller
             $userId = (int)$request->get('user_id');
             $Validator = Validator::make($request->all(), [
                 'action' => 'required|strict_string',
-                'amount' => 'required|strict_float',
+                'amount' => 'required|strict_number',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);

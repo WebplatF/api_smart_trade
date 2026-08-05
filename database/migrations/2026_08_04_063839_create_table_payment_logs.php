@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('PaymentLogs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('wallet_id');
-            $table->string('description', 20)->nullable();
+            $table->string('description', 60)->nullable();
             $table->decimal('amount', 10, 2);
             $table->enum('action', ['DEPOSIT', 'WITHDRAW', 'TRADE ENTRY']);
             $table->decimal('balance', 10, 2)->default(0.0);

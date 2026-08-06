@@ -24,12 +24,13 @@ class TradeEntryService
      * Trade Entry Creation
      *
      * @param TradeEntryCreateModel $tradeEntryCreateModel
+     * @param int $userId
      * @return object
      */
-    public function create(TradeEntryCreateModel $tradeEntryCreateModel): object
+    public function create(TradeEntryCreateModel $tradeEntryCreateModel, int $userId): object
     {
         try {
-            return DB::transaction(function () use ($tradeEntryCreateModel) {
+            return DB::transaction(function () use ($tradeEntryCreateModel, $userId) {
                 $wallet = Wallet::where('is_delete', 0)->where('id', $tradeEntryCreateModel->walletId)->first();
                 if (!$wallet) {
                     throw new Exception("User wallet not found");
@@ -60,6 +61,8 @@ class TradeEntryService
                     'loss' => $tradeEntryCreateModel->loss,
                     'remark' => $tradeEntryCreateModel->remark,
                 ]);
+                $this->walletService->walleteAction(userId: $userId, action: $tradeEntryCreateModel->winLoss === 'WIN'
+                    ? "deposite" : "withdraw", amount: $tradeAmt);
                 $this->walletService->PaymentLogsActions(
                     amount: $tradeAmt,
                     balance: $actualBal,
@@ -85,12 +88,13 @@ class TradeEntryService
      * Trade Entry Edit
      *
      * @param TradeEntryEditModel $tradeEntryEditModel
+     * @param int $userId
      * @return object
      */
-    public function edit(TradeEntryEditModel $tradeEntryEditModel): object
+    public function edit(TradeEntryEditModel $tradeEntryEditModel, int $userId): object
     {
         try {
-            return DB::transaction(function () use ($tradeEntryEditModel) {
+            return DB::transaction(function () use ($tradeEntryEditModel, $userId) {
                 $wallet = Wallet::where('is_delete', 0)->where('id', $tradeEntryEditModel->walletId)->first();
                 if (!$wallet) {
                     throw new Exception("User wallet not found");
@@ -121,6 +125,8 @@ class TradeEntryService
                     'loss' => $tradeEntryEditModel->loss,
                     'remark' => $tradeEntryEditModel->remark,
                 ]);
+                $this->walletService->walleteAction(userId: $userId, action: $tradeEntryEditModel->winLoss === 'WIN'
+                    ? "deposite" : "withdraw", amount: $tradeAmt);
                 $this->walletService->PaymentLogsActions(
                     amount: $tradeAmt,
                     balance: $actualBal,

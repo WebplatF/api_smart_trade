@@ -28,8 +28,9 @@ class TradeController extends Controller
     public function create(Request $request)
     {
         try {
+            $userId = (int)$request->get('user_id');
             $tradeEntryCreate = TradeEntryCreateModel::fromRequest(request: $request);
-            $create = $this->tradeEntryService->create(tradeEntryCreateModel: $tradeEntryCreate);
+            $create = $this->tradeEntryService->create(tradeEntryCreateModel: $tradeEntryCreate, userId: $userId);
             return ResponseHelper::successResponse(data: $create, message: "Trade entry created successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
@@ -44,8 +45,9 @@ class TradeController extends Controller
     public function edit(Request $request)
     {
         try {
+            $userId = (int)$request->get('user_id');
             $tradeEntryEdit = TradeEntryEditModel::fromRequest(request: $request);
-            $edit = $this->tradeEntryService->edit(tradeEntryEditModel: $tradeEntryEdit);
+            $edit = $this->tradeEntryService->edit(tradeEntryEditModel: $tradeEntryEdit, userId: $userId);
             return ResponseHelper::successResponse(data: $edit, message: "Trade entry edited successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());

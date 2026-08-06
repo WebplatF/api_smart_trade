@@ -12,7 +12,10 @@ class PaymentLogs extends Model
         'description',
         'amount',
         'action',
+        'direction',
+        'trade_id',
         'balance',
         'is_delete',
+        'created_at'
     ];
 }

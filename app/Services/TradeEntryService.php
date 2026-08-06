@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\TradeEntry;
+use App\Models\Wallet;
 use App\RequestModel\TradeEntryCreateModel;
 use App\RequestModel\TradeEntryEditModel;
 use App\Resources\TradeEntryResources;
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 class TradeEntryService
 {
+    protected  WalletService $walletService;
+    public function __construct(
+        WalletService $walletService
+    ) {
+        $this->walletService = $walletService;
+    }
     /**
      * Trade Entry Creation
      *
@@ -23,6 +30,18 @@ class TradeEntryService
     {
         try {
             return DB::transaction(function () use ($tradeEntryCreateModel) {
+                $wallet = Wallet::where('is_delete', 0)->where('id', $tradeEntryCreateModel->walletId)->first();
+                if (!$wallet) {
+                    throw new Exception("User wallet not found");
+                }
+                $tradeAmt = $tradeEntryCreateModel->winLoss === 'WIN'
+                    ? $tradeEntryCreateModel->profit
+                    : $tradeEntryCreateModel->loss;
+                $actualBal =   $tradeEntryCreateModel->winLoss === 'WIN'
+                    ?  bcadd($wallet->amount, $tradeAmt, 2) : bcsub($wallet->amount, $tradeAmt, 2);
+                if (bccomp($actualBal, '0.00', 2) < 0) {
+                    throw new Exception("Insufficient wallet balance.");
+                }
                 $tradeCreate = TradeEntry::create([
                     'wallet_id' => $tradeEntryCreateModel->walletId,
                     'date' => $tradeEntryCreateModel->date,
@@ -41,6 +60,17 @@ class TradeEntryService
                     'loss' => $tradeEntryCreateModel->loss,
                     'remark' => $tradeEntryCreateModel->remark,
                 ]);
+                $this->walletService->PaymentLogsActions(
+                    amount: $tradeAmt,
+                    balance: $actualBal,
+                    walletId: $tradeEntryCreateModel->walletId,
+                    action: "TRADE ENTRY",
+                    tradeId: $tradeCreate->id,
+                    direction: $tradeEntryCreateModel->winLoss === 'WIN'
+                        ? "Inward" : "Outward",
+                    description: "Amount added of trade",
+                    createdDate: $tradeEntryCreateModel->date
+                );
                 return (object)[
                     'id' => $tradeCreate->id
                 ];
@@ -61,6 +91,18 @@ class TradeEntryService
     {
         try {
             return DB::transaction(function () use ($tradeEntryEditModel) {
+                $wallet = Wallet::where('is_delete', 0)->where('id', $tradeEntryEditModel->walletId)->first();
+                if (!$wallet) {
+                    throw new Exception("User wallet not found");
+                }
+                $tradeAmt = $tradeEntryEditModel->winLoss === 'WIN'
+                    ? $tradeEntryEditModel->profit
+                    : $tradeEntryEditModel->loss;
+                $actualBal =   $tradeEntryEditModel->winLoss === 'WIN'
+                    ?  bcadd($wallet->amount, $tradeAmt, 2) : bcsub($wallet->amount, $tradeAmt, 2);
+                if (bccomp($actualBal, '0.00', 2) < 0) {
+                    throw new Exception("Insufficient wallet balance.");
+                }
                 $tradeEdit = TradeEntry::create([
                     'wallet_id' => $tradeEntryEditModel->walletId,
                     'date' => $tradeEntryEditModel->date,
@@ -79,6 +121,17 @@ class TradeEntryService
                     'loss' => $tradeEntryEditModel->loss,
                     'remark' => $tradeEntryEditModel->remark,
                 ]);
+                $this->walletService->PaymentLogsActions(
+                    amount: $tradeAmt,
+                    balance: $actualBal,
+                    walletId: $tradeEntryEditModel->walletId,
+                    action: "TRADE ENTRY",
+                    tradeId: $tradeEdit->id,
+                    direction: $tradeEntryEditModel->winLoss === 'WIN'
+                        ? "Inward" : "Outward",
+                    description: "Amount adjusted by trade of " . $tradeEntryEditModel->date,
+                    createdDate: $tradeEntryEditModel->date
+                );
                 return (object)[
                     'id' => $tradeEdit->id
                 ];
@@ -98,7 +151,7 @@ class TradeEntryService
     public function list(int $walletId): CommonListResponseModel
     {
         try {
-            $tradeEntry = TradeEntry::where('wallet_id',$walletId)->where('is_delete', 0)->paginate(15);
+            $tradeEntry = TradeEntry::where('wallet_id', $walletId)->where('is_delete', 0)->paginate(15);
             $tradeList = TradeEntryResources::collection($tradeEntry)->resolve();
             return new CommonListResponseModel(
                 totalRecords: $tradeEntry->total(),

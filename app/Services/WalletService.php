@@ -65,7 +65,7 @@ class WalletService
     public function walleteCreation(int $userId, string $date, float $amount)
     {
         try {
-           return DB::transaction(function () use ($userId, $date, $amount) {
+            return DB::transaction(function () use ($userId, $date, $amount) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
                     ->first();
@@ -88,7 +88,10 @@ class WalletService
                             balance: $userWallet->amount,
                             walletId: $userWallet->id,
                             action: "DEPOSIT",
-                            description: "Amount Deposited"
+                            tradeId: 0,
+                            direction: "Inward",
+                            description: "Amount Deposited",
+                            createdDate: Carbon::now()->toDateString()
                         );
                     }
                     $data = WalletResources::make($userWallet);
@@ -130,15 +133,21 @@ class WalletService
      * @param float $balance
      * @param integer $walletId
      * @param string $action
-     * @param string $description
+     * @param string $direction
+     * @param int $tradeId
+     * @param string $description 
+     * @param string $createdDate
      * @return object
      */
-    private function PaymentLogsActions(
+    public function PaymentLogsActions(
         float $amount,
         float $balance,
         int $walletId,
         string $action,
-        string $description
+        string $description,
+        int $tradeId,
+        string $direction,
+        string $createdDate
     ): object {
         try {
             return DB::transaction(function () use (
@@ -146,14 +155,21 @@ class WalletService
                 $balance,
                 $walletId,
                 $action,
-                $description
+                $direction,
+                $tradeId,
+                $description,
+                $createdDate
             ) {
+                $timestamp = Carbon::parse($createdDate)->startOfDay();
                 $log = PaymentLogs::create([
                     'wallet_id' => $walletId,
                     'description' => $description ?? "",
                     'amount' => $amount,
                     'action' => $action,
+                    'direction' => $direction,
+                    'trade_id' => $tradeId ?? 0,
                     'balance' => $balance,
+                    'created_at' => $timestamp
                 ]);
                 return $log;
             });
@@ -186,7 +202,10 @@ class WalletService
                     balance: $wallet->amount,
                     walletId: $wallet->id,
                     action: "DEPOSIT",
-                    description: "Amount Deposited to account"
+                    tradeId: 0,
+                    direction: "Inward",
+                    description: "Amount Deposited to account",
+                    createdDate: Carbon::now()->toDateString()
                 );
                 return (object)[
                     'id' => $history->id,
@@ -225,7 +244,10 @@ class WalletService
                     balance: $wallet->amount,
                     walletId: $wallet->id,
                     action: "WITHDRAW",
-                    description: "Amount widthdraw from account"
+                    tradeId: 0,
+                    direction: "Outward",
+                    description: "Amount widthdraw from account",
+                    createdDate: Carbon::now()->toDateString()
                 );
                 return (object)[
                     'id' => $history->id,
@@ -240,5 +262,5 @@ class WalletService
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
-    } 
+    }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('video_id')->unique();
             $table->string('media_url');
             $table->string('source_id')->nullable();
+            $table->enum('status', ['Processing', 'Done'])->default('Processing');
             $table->integer('thumbnail_id');
             $table->bigInteger('durations');
             $table->boolean('is_delete')->default(false);

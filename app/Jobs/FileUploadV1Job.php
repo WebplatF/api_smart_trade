@@ -55,6 +55,7 @@ class FileUploadV1Job extends Job implements ShouldQueue
                     [
                         'media_url'    => "",
                         'source_id' => $videoId,
+                        'status' => 'Processing',
                         'thumbnail_id' => $this->thumbnailId,  // now included
                         'durations' => $this->duration ?? 0
                     ]

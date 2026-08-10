@@ -32,10 +32,15 @@ class WebhooksController extends Controller
                 ]);
                 throw new Exception("Kinescope webhook error" . $status);
             }
-            $video = VideoUpload::where('source_id', $kinescopeId)->first();
-            if ($video) {
-            } else {
-                throw new Exception("Invalid video");
+            if ($status === 'done') {
+                $video = VideoUpload::where('source_id', $kinescopeId)->first();
+                if ($video) {
+                    $video->update([
+                        'status' => 'Done',
+                    ]);
+                } else {
+                    throw new Exception("Invalid video");
+                }
             }
         } catch (Exception $e) {
             Log::error('Kinescope webhook error', [

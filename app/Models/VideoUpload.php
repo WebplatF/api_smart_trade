@@ -13,6 +13,7 @@ class VideoUpload extends Model
         'thumbnail_id',
         'source_id',
         'media_url',
+        'status',
         'durations'
     ];
 

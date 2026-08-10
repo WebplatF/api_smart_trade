@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Events\FileMergeEvent;
+use App\Events\FileMergeV1Event;
 use App\Events\FileUploadEvent;
+use App\Events\FileUploadV1Event;
 use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -19,6 +21,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         FileUploadEvent::class => [
             \App\Listeners\FileUploadListener::class
+        ],
+        FileMergeV1Event::class => [
+            \App\Listeners\FileMergeV1Listener::class
+        ],
+        FileUploadV1Event::class => [
+            \App\Listeners\FileUploadV1Listener::class
         ]
     ];
 

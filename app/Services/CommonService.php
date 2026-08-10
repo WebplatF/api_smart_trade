@@ -315,7 +315,7 @@ class CommonService
             $token = config('AppConfig.kinescope_api_key');
             $client = new Client();
             $response = $client->get(
-                $url . "/:" . $sourceId,
+                $url . "/" . $sourceId,
                 [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $token,

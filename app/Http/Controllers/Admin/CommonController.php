@@ -125,6 +125,23 @@ class CommonController extends Controller
     }
     /**
      * @param Illuminate\Http\Request $request
+     * @return string response
+     */
+    public function getVideoPath(Request $request)
+    {
+        try {
+            $path = $request->query('path');
+            if (!$path) {
+                return ResponseHelper::failureResponse(message: "Invalid Path", code: 400);
+            }
+            $playlist = $this->commonService->getVideoPath(videoId: $path);
+            return ResponseHelper::successResponse(data: $playlist, message: "Data Arrived");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getVideoUrl(Request $request)

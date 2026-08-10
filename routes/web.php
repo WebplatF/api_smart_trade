@@ -94,7 +94,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/create', 'Coupon\CouponController@create');
         });
     });
-    $router->group(['prefix' => 'admin/v1'], function () use ($router) {
+    $router->group(['prefix' => 'admin/v1', 'middleware' => 'apikey'], function () use ($router) {
         $router->post('/common/video_upload', 'Admin\CommonController@videoUpload');
+        $router->get('/common/get_video', 'Admin\CommonController@getVideoPath');
     });
 });

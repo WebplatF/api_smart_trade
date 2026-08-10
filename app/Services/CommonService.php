@@ -14,6 +14,7 @@ use App\Traits\CommonTraits;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -160,7 +161,7 @@ class CommonService
                         chunckDir: $chunkDir,
                         thumbnailId: $thumbnailId,
                         ext: $ext,
-                        duration:$duration
+                        duration: $duration
                     ));
                     return [
                         'status' => 'completed',
@@ -282,6 +283,51 @@ class CommonService
             } else {
                 // handle not found
                 throw new Exception("Invalid Video Id");
+            }
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * @param string $path
+     * @return string $cdnUrl
+     * @throws Exception
+     */
+    public function getVideoPath(string $videoId,)
+    {
+        try {
+            $video = VideoUpload::where('video_id', $videoId)->first();
+            if ($video) {
+                $url = $this->getKinoscopicPath($video->source_id);
+                return $url;
+            } else {
+                // handle not found
+                throw new Exception("Invalid Video Id");
+            }
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    private function getKinoscopicPath(string $sourceId)
+    {
+        try {
+            $url = config('AppConfig.kinescope_video_url');
+            $token = config('AppConfig.kinescope_api_key');
+            $client = new Client();
+            $response = $client->get(
+                $url . "/:" . $sourceId,
+                [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $token,
+                    ],
+                ]
+            );
+            if ($response->getStatusCode() == 200) {
+                $body = json_decode($response->getBody()->getContents());
+                $videoUrl = $body->data->hls_link;
+                return $videoUrl;
+            } else {
+                throw new Exception(json_decode($response->getBody()->getContents()));
             }
         } catch (Exception $e) {
             throw new Exception($e->getMessage());

@@ -16,6 +16,7 @@ use Aws\Exception\AwsException;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
@@ -135,39 +136,41 @@ class CommonService
     public function uploadVideo(Request $request): array
     {
         try {
-            $uploadId    = $request->upload_id;
-            $chunkIndex  = $request->chunk_index;
-            $totalChunks = $request->total_chunks;
-            $thumbnailId = $request->thumbnail_id;
-            $ext = $request->extension;
-            $file = $request->file;
-            $chunkDir = storage_path("app/chunks/{$uploadId}");
-            if (!File::exists($chunkDir)) {
-                File::makeDirectory($chunkDir, 0755, true);
-            }
-            $file->move(
-                $chunkDir,
-                "chunk_{$chunkIndex}"
-            );
-            if ($this->allChunksUploaded($chunkDir, $totalChunks)) {
-                $finalPath = storage_path("app/videos/{$uploadId}");
-                event(new FileMergeV1Event(
-                    fileName: $uploadId,
-                    finalPath: $finalPath,
-                    chunckDir: $chunkDir,
-                    thumbnailId: $thumbnailId,
-                    ext: $ext
-                ));
-                return [
-                    'status' => 'completed',
-                    'file'   => "{$uploadId}.zip"
-                ];
-            }
+            return  DB::transaction(function () use ($request) {
+                $uploadId    = $request->upload_id;
+                $chunkIndex  = $request->chunk_index;
+                $totalChunks = $request->total_chunks;
+                $thumbnailId = $request->thumbnail_id;
+                $ext = $request->ext;
+                $file = $request->file;
+                $chunkDir = storage_path("app/chunks/{$uploadId}");
+                if (!File::exists($chunkDir)) {
+                    File::makeDirectory($chunkDir, 0755, true);
+                }
+                $file->move(
+                    $chunkDir,
+                    "chunk_{$chunkIndex}"
+                );
+                if ($this->allChunksUploaded($chunkDir, $totalChunks)) {
+                    $finalPath = storage_path("app/videos/{$uploadId}");
+                    event(new FileMergeV1Event(
+                        fileName: $uploadId,
+                        finalPath: $finalPath,
+                        chunckDir: $chunkDir,
+                        thumbnailId: $thumbnailId,
+                        ext: $ext
+                    ));
+                    return [
+                        'status' => 'completed',
+                        'file'   => "{$uploadId}.zip"
+                    ];
+                }
 
-            return [
-                'status' => 'uploading',
-                'chunk'  => $chunkIndex
-            ];
+                return [
+                    'status' => 'uploading',
+                    'chunk'  => $chunkIndex
+                ];
+            });
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         } catch (QueryException $e) {

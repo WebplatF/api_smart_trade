@@ -20,6 +20,9 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix' => 'payment', 'middleware' => 'payment'], function () use ($router) {
     $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
+$router->group(['prefix' => 'webhooks'], function () use ($router) {
+    $router->post('/video_status', 'Webhooks\WebhooksController@paymentCapture');
+});
 
 $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($router) {
     $router->post('/user/register', 'User\UserController@register');

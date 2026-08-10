@@ -325,7 +325,7 @@ class CommonService
             if ($response->getStatusCode() == 200) {
                 $body = json_decode($response->getBody()->getContents());
                 $videoUrl = $body->data->hls_link;
-                return $videoUrl;
+                return $body->data->hls_link;
             } else {
                 throw new Exception(json_decode($response->getBody()->getContents()));
             }

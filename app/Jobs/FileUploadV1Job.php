@@ -49,7 +49,7 @@ class FileUploadV1Job extends Job implements ShouldQueue
             );
             if ($response->getStatusCode() == 200) {
                 $body = json_decode($response->getBody()->getContents());
-                $videoId = $body['data']['id'];
+                $videoId = $body->data->id;
                 VideoUpload::firstOrCreate(
                     ['video_id' => pathinfo($this->fileName, PATHINFO_FILENAME)],
                     [

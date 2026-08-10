@@ -41,6 +41,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
                 File::makeDirectory($tempDir, 0777, true, true);
             }
             $finalPath = $this->finalPath . "." . $ext;
+            
             set_time_limit(0);
             $output = fopen($finalPath, 'wb');
             if (!$output) {
@@ -48,6 +49,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
             }
             // Get chunks
             $chunks = glob($this->chunckDir . '/chunk_*');
+            
             if (!$chunks || count($chunks) === 0) {
                 throw new Exception("No chunks found");
             }
@@ -68,6 +70,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
             }
 
             fclose($output);
+           
             // Detect mime
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mime = finfo_file($finfo, $finalPath);
@@ -76,8 +79,10 @@ class FileMergeV1Job extends Job implements ShouldQueue
                 'video/mp4'        => 'mp4'
             ];
             $detectedExt = $map[$mime] ?? null;
+            
             // Validate extension
             if (!$detectedExt || $detectedExt !== $ext) {
+                 
                 if (file_exists($finalPath)) {
                     unlink($finalPath);
                 }
@@ -85,10 +90,10 @@ class FileMergeV1Job extends Job implements ShouldQueue
             }
             // Cleanup chunks
             File::deleteDirectory($this->chunckDir);
-            $duration = $this->getMp4Duration(filePath: $this->finalPath);
+            $duration = $this->getMp4Duration(filePath: $finalPath);
             event(new FileUploadV1Event(
                 fileName: $this->fileName,
-                finalPath: $this->finalPath,
+                finalPath: $finalPath,
                 thumbnailId: $this->thumbnailId,
                 duration: $duration,
             ));

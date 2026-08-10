@@ -142,6 +142,7 @@ class CommonService
                 $totalChunks = $request->total_chunks;
                 $thumbnailId = $request->thumbnail_id;
                 $ext = $request->ext;
+                $duration = $request->duration;
                 $file = $request->file;
                 $chunkDir = storage_path("app/chunks/{$uploadId}");
                 if (!File::exists($chunkDir)) {
@@ -158,7 +159,8 @@ class CommonService
                         finalPath: $finalPath,
                         chunckDir: $chunkDir,
                         thumbnailId: $thumbnailId,
-                        ext: $ext
+                        ext: $ext,
+                        duration:$duration
                     ));
                     return [
                         'status' => 'completed',

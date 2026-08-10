@@ -9,6 +9,7 @@ class FileMergeV1Event extends Event
     public $finalPath;
     public $thumbnailId;
     public $ext;
+    public $duration;
     /**
      * Create a new event instance.
      *
@@ -19,6 +20,7 @@ class FileMergeV1Event extends Event
         string $chunckDir,
         string $finalPath,
         int $thumbnailId,
+        int $duration,
         string $ext
     ) {
         $this->fileName = $fileName;
@@ -26,5 +28,6 @@ class FileMergeV1Event extends Event
         $this->finalPath = $finalPath;
         $this->thumbnailId = $thumbnailId;
         $this->ext = $ext;
+        $this->duration = $duration;
     }
 }

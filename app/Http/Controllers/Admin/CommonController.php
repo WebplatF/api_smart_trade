@@ -74,6 +74,7 @@ class CommonController extends Controller
                 'chunk_index'   => 'required|integer',
                 'total_chunks'  => 'required|integer',
                 'thumbnail_id'  => 'required|integer',
+                'duration' => 'required|integer',
                 'ext'  => 'required|string',
                 'file' => 'required|file',
             ]);

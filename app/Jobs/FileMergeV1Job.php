@@ -13,6 +13,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
     public string $chunckDir;
     public string $finalPath;
     public int $thumbnailId;
+    public int $duration;
     public string $ext;
     public int $tries = 3;  // try 3 times before failing
     public int $backoff = 5; // wait 10 seconds before retrying
@@ -22,6 +23,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
         string $chunckDir,
         string $finalPath,
         string $ext,
+        int $duration,
         int $thumbnailId
     ) {
         // ONLY primitive data
@@ -29,6 +31,7 @@ class FileMergeV1Job extends Job implements ShouldQueue
         $this->chunckDir = $chunckDir;
         $this->finalPath = $finalPath;
         $this->thumbnailId = $thumbnailId;
+        $this->duration = $duration;
         $this->ext = $ext;
     }
     public function handle()
@@ -90,115 +93,14 @@ class FileMergeV1Job extends Job implements ShouldQueue
             }
             // Cleanup chunks
             File::deleteDirectory($this->chunckDir);
-            $duration = $this->getMp4Duration(filePath: $finalPath);
             event(new FileUploadV1Event(
                 fileName: $this->fileName,
                 finalPath: $finalPath,
                 thumbnailId: $this->thumbnailId,
-                duration: $duration,
+                duration: $this->duration,
             ));
         } catch (Exception $e) {
             throw $e; // important so job is marked failed
         }
-    }
-    function getMp4Duration(string $filePath)
-    {
-        $fp = fopen($filePath, 'rb');
-
-        if (!$fp) {
-            return 0;
-        }
-
-        while (!feof($fp)) {
-
-            $sizeData = fread($fp, 4);
-            $type = fread($fp, 4);
-
-            if (strlen($sizeData) !== 4 || strlen($type) !== 4) {
-                break;
-            }
-
-            $size = unpack('N', $sizeData)[1];
-
-            // Handle extended size
-            if ($size === 1) {
-                $largeSize = fread($fp, 8);
-                $parts = unpack('N2', $largeSize);
-
-                $size = ($parts[1] * 4294967296) + $parts[2];
-            }
-
-            if ($type === 'moov') {
-
-                $moovStart = ftell($fp);
-                $moovEnd = $moovStart + $size - 8;
-
-                while (ftell($fp) < $moovEnd) {
-
-                    $atomSizeData = fread($fp, 4);
-                    $atomType = fread($fp, 4);
-
-                    if (strlen($atomSizeData) !== 4) {
-                        break;
-                    }
-
-                    $atomSize = unpack('N', $atomSizeData)[1];
-
-                    if ($atomType === 'mvhd') {
-
-                        $version = ord(fread($fp, 1));
-
-                        // flags
-                        fread($fp, 3);
-
-                        if ($version === 1) {
-
-                            // creation + modification
-                            fread($fp, 16);
-
-                            $timescale = unpack('N', fread($fp, 4))[1];
-
-                            $durationParts = unpack('N2', fread($fp, 8));
-
-                            $duration =
-                                ($durationParts[1] * 4294967296)
-                                + $durationParts[2];
-                        } else {
-
-                            // creation + modification
-                            fread($fp, 8);
-
-                            $timescale = unpack('N', fread($fp, 4))[1];
-
-                            $duration = unpack('N', fread($fp, 4))[1];
-                        }
-
-                        fclose($fp);
-
-                        if ($timescale > 0) {
-                            return (int) round($duration / $timescale);
-                        }
-
-                        return 0;
-                    }
-
-                    // Move to next atom
-                    if ($atomSize > 8) {
-                        fseek($fp, $atomSize - 8, SEEK_CUR);
-                    }
-                }
-
-                break;
-            }
-
-            // Move to next atom
-            if ($size > 8) {
-                fseek($fp, $size - 8, SEEK_CUR);
-            }
-        }
-
-        fclose($fp);
-
-        return 0;
     }
 }

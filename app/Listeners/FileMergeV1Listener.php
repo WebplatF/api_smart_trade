@@ -35,7 +35,8 @@ class FileMergeV1Listener
             chunckDir: $event->chunckDir,
             finalPath: $event->finalPath,
             thumbnailId: $event->thumbnailId,
-            ext: $event->ext
+            ext: $event->ext,
+            duration:$event->duration
         ));
     }
 }

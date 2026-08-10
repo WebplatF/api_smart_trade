@@ -16,7 +16,7 @@ class WebhooksController extends Controller
         try {
             $payload = $request->all();
             Log::info('Kinescope webhook', [
-                'message' => $payload['event']
+                'message' => $payload
             ]);
             if (($payload['event'] ?? null) !== 'media.update.status') {
                 Log::error('Kinescope webhook error', [

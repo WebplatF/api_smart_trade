@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Events\FileMergeEvent;
+use App\Events\FileMergeV1Event;
+use App\Helper\DatabaseErrorHelper;
 use App\Models\ImageUpload;
 use App\Models\VideoUpload;
 use App\Resources\ImagesResources;
@@ -13,6 +15,7 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Exception;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
@@ -106,7 +109,7 @@ class CommonService
                     fileName: "{$uploadId}.zip",
                     finalPath: $finalPath,
                     chunckDir: $chunkDir,
-                    thumbnailId: $thumbnailId
+                    thumbnailId: $thumbnailId,
                 ));
                 return [
                     'status' => 'completed',
@@ -122,6 +125,53 @@ class CommonService
             throw new Exception($e->getMessage());
         } catch (QueryException $e) {
             throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
+        }
+    }
+    /**
+     * @param  Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function uploadVideo(Request $request): array
+    {
+        try {
+            $uploadId    = $request->upload_id;
+            $chunkIndex  = $request->chunk_index;
+            $totalChunks = $request->total_chunks;
+            $thumbnailId = $request->thumbnail_id;
+            $ext = $request->extension;
+            $file = $request->file;
+            $chunkDir = storage_path("app/chunks/{$uploadId}");
+            if (!File::exists($chunkDir)) {
+                File::makeDirectory($chunkDir, 0755, true);
+            }
+            $file->move(
+                $chunkDir,
+                "chunk_{$chunkIndex}"
+            );
+            if ($this->allChunksUploaded($chunkDir, $totalChunks)) {
+                $finalPath = storage_path("app/videos/{$uploadId}");
+                event(new FileMergeV1Event(
+                    fileName: $uploadId,
+                    finalPath: $finalPath,
+                    chunckDir: $chunkDir,
+                    thumbnailId: $thumbnailId,
+                    ext: $ext
+                ));
+                return [
+                    'status' => 'completed',
+                    'file'   => "{$uploadId}.zip"
+                ];
+            }
+
+            return [
+                'status' => 'uploading',
+                'chunk'  => $chunkIndex
+            ];
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         }
     }
     /**

@@ -11,6 +11,7 @@ class VideoUpload extends Model
     protected $fillable = [
         'video_id',
         'thumbnail_id',
+        'source_id',
         'media_url',
         'durations'
     ];

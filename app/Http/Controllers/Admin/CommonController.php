@@ -6,6 +6,7 @@ use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Services\CommonService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Throwable;
 use Illuminate\Support\Facades\Validator;
 
@@ -56,6 +57,30 @@ class CommonController extends Controller
                 return ResponseHelper::failureResponse(message: $validator->errors()->first(), code: 400);
             }
             $response = $this->commonService->storeVideo($request);
+            return ResponseHelper::successResponse(data: ["url" => $response], message: "Image Uploaded", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function videoUpload(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'upload_id'     => 'required',
+                'chunk_index'   => 'required|integer',
+                'total_chunks'  => 'required|integer',
+                'thumbnail_id'  => 'required|integer',
+                'ext'  => 'required|string',
+                'file' => 'required|file',
+            ]);
+            if ($validator->fails()) {
+                return ResponseHelper::failureResponse(message: $validator->errors()->first(), code: 400);
+            }
+            $response = $this->commonService->uploadVideo($request);
             return ResponseHelper::successResponse(data: ["url" => $response], message: "Image Uploaded", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);

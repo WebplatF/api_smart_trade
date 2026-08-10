@@ -17,7 +17,7 @@ class FileMergeEvent extends Event
         string $fileName,
         string $chunckDir,
         string $finalPath,
-        int $thumbnailId
+        int $thumbnailId,
     ) {
         $this->fileName = $fileName;
         $this->chunckDir = $chunckDir;

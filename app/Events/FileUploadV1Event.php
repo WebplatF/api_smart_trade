@@ -2,11 +2,12 @@
 
 namespace App\Events;
 
-class FileUploadEvent extends Event
+class FileUploadV1Event extends Event
 {
     public $fileName;
-    public $chunckDir;
+    public $finalPath;
     public $thumbnailId;
+    public $duration;
     /**
      * Create a new event instance.
      *
@@ -14,11 +15,13 @@ class FileUploadEvent extends Event
      */
     public function __construct(
         string $fileName,
-        string $chunckDir,
+        string $finalPath,
         int $thumbnailId,
+        string $duration,
     ) {
         $this->fileName = $fileName;
-        $this->chunckDir = $chunckDir;
+        $this->finalPath = $finalPath;
         $this->thumbnailId = $thumbnailId;
+        $this->duration = $duration;
     }
 }

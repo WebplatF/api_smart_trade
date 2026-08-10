@@ -26,7 +26,6 @@ class FileUploadJob extends Job implements ShouldQueue
         $this->chunckDir = $chunckDir;
         $this->thumbnailId = $thumbnailId;
     }
-
     public function handle()
     {
         Log::info('ZIP Job started', ['file' => $this->fileName]);

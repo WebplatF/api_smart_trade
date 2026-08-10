@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('video_id')->unique();
             $table->string('media_url');
+            $table->string('source_id')->nullable();
             $table->integer('thumbnail_id');
             $table->bigInteger('durations');
             $table->boolean('is_delete')->default(false);

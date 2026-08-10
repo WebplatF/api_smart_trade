@@ -21,7 +21,7 @@ $router->group(['prefix' => 'payment', 'middleware' => 'payment'], function () u
     $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
 $router->group(['prefix' => 'webhooks'], function () use ($router) {
-    $router->post('/video_status', 'Webhooks\WebhooksController@paymentCapture');
+    $router->post('/video_status', 'Webhooks\WebhooksController@videoStatusUpdate');
 });
 
 $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($router) {

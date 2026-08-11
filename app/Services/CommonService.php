@@ -85,6 +85,45 @@ class CommonService
         }
     }
     /**
+     * @param $file
+     * @param string $folder
+     * @param string $title
+     * @return array
+     * @throws Exception
+     */
+    public function uploadImage($file, $folder, $title): array
+    {
+        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+
+        $key = "{$folder}/{$filename}_" . uniqid() . ".{$extension}";
+
+        try {
+            // Local storage path
+            $storagePath = base_path("public/{$key}");
+            // Make sure folder exists
+            $directory = dirname($storagePath);
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            // Save uploaded file
+            $file->move($directory, basename($key));
+            $image = ImageUpload::create([
+                'title' => $title ?? null,
+                'media_url' => $key
+            ]);
+
+            return [
+                'object_key' => $key,
+                'image' => $image
+            ];
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
      * @param  $request
      * @return array
      * @throws Exception
@@ -324,8 +363,7 @@ class CommonService
             );
             if ($response->getStatusCode() == 200) {
                 $body = json_decode($response->getBody()->getContents());
-                $videoUrl = $body->data->hls_link;
-                return $body->data->hls_link;
+                return $body->data->assets[0]->url;
             } else {
                 throw new Exception(json_decode($response->getBody()->getContents()));
             }

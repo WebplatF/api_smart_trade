@@ -40,6 +40,26 @@ class CommonController extends Controller
         }
     }
     /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function imageUploadV1(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'image' => 'required|file|mimes:jpg,jpeg,png',
+            ]);
+            if ($validator->fails()) {
+                return ResponseHelper::failureResponse(message: $validator->errors()->first(), code: 400);
+            }
+            $title = $request->get('title');
+            $response = $this->commonService->uploadImage(file: $request->file('image'), folder: 'images', title: $title);
+            return ResponseHelper::successResponse(data: ["url" => $response], message: "Image Uploaded", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */

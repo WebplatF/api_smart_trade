@@ -152,7 +152,7 @@ class HomePageService
                     // $image_path = $this->signCdnUrl(path: $item->image->media_url, ttl: 300,);
                     $response['banner'][] = [
                         'title' => $item->title,
-                        'path' => $$item->image->media_url
+                        'path' => $item->image->media_url
                     ];
                 }
                 if ($item->type === 'video' && $item->video) {

@@ -29,10 +29,10 @@ class HomePageService
                 ]
             );
             return "";
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
             throw new Exception("Banner add Failed:" . $e->getMessage());
-        } catch (QueryException $e) {
-            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
         }
     }
     /**
@@ -154,59 +154,6 @@ class HomePageService
      * @throws Exception
      */
     public function homebuilderData()
-    {
-        try {
-            $queryData = HomePageMaster::where('is_delete', 0)->with([
-                'image',
-                'video',
-                'video.thumbnail'
-            ])->get();
-            $weeklyMeeting = WeeklyMeeting::where('is_delete', 0)->with([
-                'video',
-                'video.thumbnail'
-            ])->get();
-            $response = [
-                'banner' => [],
-                'demo_videos' => [],
-                'weekly_meeting' => [],
-            ];
-            foreach ($queryData as $item) {
-                if ($item->type === 'image' && $item->image) {
-                    $response['banner'][] = [
-                        'id' => $item->id,
-                        'title' => $item->title,
-                        'path' => $item->image->media_url
-                    ];
-                }
-                if ($item->type === 'video' && $item->video) {
-                    $response['demo_videos'][] = [
-                        'id' => $item->id,
-                        'title' => $item->title,
-                        'video_id' => $item->video->video_id,
-                        'thumbnail' => $item->video->thumbnail->media_url
-                    ];
-                }
-            }
-            foreach ($weeklyMeeting as $item) {
-                $response['weekly_meeting'][] = [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'video_id' => $item->video->video_id,
-                    'thumbnail' => $item->video->thumbnail->media_url
-                ];
-            }
-            return $response;
-        } catch (Exception $e) {
-            throw new Exception("Banner add Failed:" . $e->getMessage());
-        } catch (QueryException $e) {
-            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
-        }
-    }
-    /**
-     * @return array $banner & videos urls 
-     * @throws Exception
-     */
-    public function homebuilderDataV1()
     {
         try {
             $queryData = HomePageMaster::where('is_delete', 0)->with([

@@ -123,6 +123,27 @@ class CommonService
             throw new Exception($e->getMessage());
         }
     }
+    public function deleteImage(string $path)
+    {
+        try {
+            DB::transaction(function () use ($path) {
+                $image = ImageUpload::where('media_url', $path)->first();
+                if (!$image) {
+                    throw new Exception("Image not found");
+                }
+                $publicPath = base_path("public/{$image->media_url}");
+                if (file_exists($publicPath)) {
+                    unlink($publicPath);
+                }
+                // Delete database record
+                $image->delete();
+            });
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
     /**
      * @param  $request
      * @return array

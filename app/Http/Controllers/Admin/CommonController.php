@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Services\CommonService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Throwable;
@@ -55,6 +56,23 @@ class CommonController extends Controller
             $title = $request->get('title');
             $response = $this->commonService->uploadImage(file: $request->file('image'), folder: 'images', title: $title);
             return ResponseHelper::successResponse(data: ["url" => $response], message: "Image Uploaded", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function imageDelete(Request $request)
+    {
+        try {
+            $path = $request->query('path');
+            if (!$path) {
+                throw new Exception("Invalid path");
+            }
+            $this->commonService->deleteImage(path: $path);
+            return ResponseHelper::successResponse(message: "Image Deleted Successfully..!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

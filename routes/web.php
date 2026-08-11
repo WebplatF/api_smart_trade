@@ -60,7 +60,9 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');
         $router->post('/add_demo', 'Admin\HomePageController@addDemoVideo');
+        $router->post('/edit_demo', 'Admin\HomePageController@editDemoVideo');
         $router->post('add_weekly', 'Admin\HomePageController@addWeeklyMeeting');
+        $router->post('edit_weekly', 'Admin\HomePageController@editWeeklyMeeting');
         $router->post('/common/file_upload', 'Admin\CommonController@fileUpload');
         $router->get('/image_list', 'Admin\CommonController@getImageList');
         $router->get('/video_list', 'Admin\CommonController@getVideoList');

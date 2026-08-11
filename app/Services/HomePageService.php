@@ -52,33 +52,35 @@ class HomePageService
                 ]
             );
             return "";
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
             throw new Exception("Banner add Failed:" . $e->getMessage());
-        } catch (QueryException $e) {
-            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
         }
     }
-     /**
+    /**
      * @param string $title
      * @param string $videoId
      * @return string
      * @throws Exception
      */
-    public function editDemoVideo(string $title, string $videoId)
+    public function editDemoVideo(int $id, string $title, string $videoId)
     {
         try {
-            HomePageMaster::create(
-                [
-                    'title' => $title,
-                    'source_id' => $videoId,
-                    'type' => 'video'
-                ]
-            );
+            $demoData = HomePageMaster::where('is_delete', 0)->find($id);
+            if (!$demoData) {
+                throw new Exception("Invalid demo video");
+            }
+            $demoData->update([
+                'title' => $title,
+                'source_id' => $videoId,
+                'type' => 'video'
+            ]);
             return "";
-        } catch (Exception $e) {
-            throw new Exception("Banner add Failed:" . $e->getMessage());
         } catch (QueryException $e) {
-            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception("Banner edit Failed:" . $e->getMessage());
         }
     }
     /**
@@ -97,13 +99,38 @@ class HomePageService
                 ]
             );
             return "";
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
             throw new Exception("Weekly meeting add Failed:" . $e->getMessage());
-        } catch (QueryException $e) {
-            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
         }
     }
-    
+    /**
+     * @param string $title
+     * @param string $videoId
+     * @return string
+     * @throws Exception
+     */
+    public function editWeeklyMeeting(int $id, string $title, string $videoId)
+    {
+        try {
+            $weekly = WeeklyMeeting::where('is_delete', 0)->find($id);
+            if (!$weekly) {
+                throw new Exception("Invalid weekly video");
+            }
+            $weekly->unpadate([
+                [
+                    'title' => $title,
+                    'source_id' => $videoId,
+                ]
+            ]);
+            return "";
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception("Weekly meeting edit Failed:" . $e->getMessage());
+        }
+    }
     /**
      * @return array $banner & videos urls 
      * @throws Exception
@@ -131,6 +158,7 @@ class HomePageService
                 if ($item->type === 'video' && $item->video) {
                     $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
                     $response['demo_videos'][] = [
+                        'id' => $item->id,
                         'title' => $item->title,
                         'video_id' => $item->video->video_id,
                         'thumbnail' => $image_path
@@ -161,6 +189,7 @@ class HomePageService
             foreach ($queryData as $item) {
                 $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
                 $response['weekly_meeting'][] = [
+                    'id' => $item->id,
                     'title' => $item->title,
                     'path' => $item->video->video_id,
                     'thumbnail' => $image_path

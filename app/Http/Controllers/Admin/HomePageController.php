@@ -45,7 +45,6 @@ class HomePageController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
-
     /**
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -77,6 +76,35 @@ class HomePageController extends Controller
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    public function editDemoVideo(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'id' => 'required|strict_int',
+                'title' => 'required|strict_string',
+                'video_id' => 'required|strict_int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $this->homePageService->editDemoVideo(
+                id: $request->get('id'),
+                title: $request->get('title'),
+                videoId: $request->get('video_id')
+            );
+            return ResponseHelper::successResponse(data: [], message: "Demo video edit successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addWeeklyMeeting(Request $request)
     {
         try {
@@ -96,6 +124,35 @@ class HomePageController extends Controller
                 videoId: $request->get('video_id')
             );
             return ResponseHelper::successResponse(data: [], message: "Weekly meeting video added successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editWeeklyMeeting(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'id' => 'required|strict_int',
+                'title' => 'required|strict_string',
+                'video_id' => 'required|strict_int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $this->homePageService->editWeeklyMeeting(
+                id: $request->get('id'),
+                title: $request->get('title'),
+                videoId: $request->get('video_id')
+            );
+            return ResponseHelper::successResponse(data: [], message: "Weekly meeting video edit successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }

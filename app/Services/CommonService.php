@@ -407,7 +407,7 @@ class CommonService
             );
             if ($response->getStatusCode() == 200) {
                 $body = json_decode($response->getBody()->getContents());
-                return $body->data->assets[0]->url;
+                return $body->data->embed_link;
             } else {
                 throw new Exception(json_decode($response->getBody()->getContents()));
             }

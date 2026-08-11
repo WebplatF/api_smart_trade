@@ -149,19 +149,19 @@ class HomePageService
             ];
             foreach ($queryData as $item) {
                 if ($item->type === 'image' && $item->image) {
-                    $image_path = $this->signCdnUrl(path: $item->image->media_url, ttl: 300,);
+                    // $image_path = $this->signCdnUrl(path: $item->image->media_url, ttl: 300,);
                     $response['banner'][] = [
                         'title' => $item->title,
-                        'path' => $image_path
+                        'path' => $$item->image->media_url
                     ];
                 }
                 if ($item->type === 'video' && $item->video) {
-                    $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
+                    // $image_path = $this->signCdnUrl(path: $item->video->thumbnail->media_url, ttl: 300,);
                     $response['demo_videos'][] = [
                         'id' => $item->id,
                         'title' => $item->title,
                         'video_id' => $item->video->video_id,
-                        'thumbnail' => $image_path
+                        'thumbnail' => $item->video->thumbnail->media_url
                     ];
                 }
             }

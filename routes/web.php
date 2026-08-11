@@ -100,7 +100,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->group(['prefix' => 'admin/v1', 'middleware' => 'apikey'], function () use ($router) {
         $router->get('/initial_data', 'Admin\HomePageController@initialData');
         $router->post('/common/image_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageUploadV1']);
-        $router->post('/common/image_delete', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageDelete']);
+        $router->delete('/common/image_delete', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageDelete']);
         $router->post('/common/video_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@videoUpload']);
         $router->get('/common/get_video', 'Admin\CommonController@getVideoPath');
     });

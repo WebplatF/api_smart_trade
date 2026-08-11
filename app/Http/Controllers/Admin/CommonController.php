@@ -179,6 +179,29 @@ class CommonController extends Controller
         }
     }
     /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function editVideoThumbnail(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'video_id'     => 'required|strict_int',
+                'thumb_id'     => 'required|strict_int',
+            ]);
+            if ($validator->fails()) {
+                return ResponseHelper::failureResponse(message: $validator->errors()->first(), code: 400);
+            }
+            $response = $this->commonService->videoThumbnailChange(
+                videoId: $request->get('video_id'),
+                thumb: $request->get('thumb_id')
+            );
+            return ResponseHelper::successResponse(data: ["url" => $response], message: "Video thumbnail changed successfully..!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */

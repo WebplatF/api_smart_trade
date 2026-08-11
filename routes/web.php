@@ -104,6 +104,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->post('/common/image_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageUploadV1']);
         $router->delete('/common/image_delete', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageDelete']);
         $router->post('/common/video_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@videoUpload']);
+        $router->post('/common/video_edit', ['middleware' => 'token', 'uses' => 'Admin\CommonController@editVideoThumbnail']);
         $router->get('/common/get_video', 'Admin\CommonController@getVideoPath');
     });
 });

@@ -368,6 +368,29 @@ class CommonService
             throw new Exception($e->getMessage());
         }
     }
+    /**
+     * @param string $path
+     * @return string $cdnUrl
+     * @throws Exception
+     */
+    public function videoThumbnailChange(string $videoId, int $thumb)
+    {
+        try {
+            DB::transaction(function () use ($videoId, $thumb) {
+                $video = VideoUpload::where('video_id', $videoId)->first();
+                if ($video) {
+                    $video->update([
+                        'thumbnail_id' => $thumb
+                    ]);
+                } else {
+                    // handle not found
+                    throw new Exception("Invalid Video Id");
+                }
+            });
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
     private function getKinoscopicPath(string $sourceId)
     {
         try {
@@ -418,7 +441,7 @@ class CommonService
     public function videoList(): CommonListResponseModel
     {
         try {
-            $videos = VideoUpload::with('thumbnail')->paginate(15);
+            $videos = VideoUpload::with('thumbnail')->where('status', 'Done')->paginate(15);
             $videoList =  VideosResources::collection($videos->items())->resolve();
             $videoResponse = new CommonListResponseModel(
                 currentPage: $videos->currentPage(),

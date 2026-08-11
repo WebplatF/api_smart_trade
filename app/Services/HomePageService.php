@@ -58,6 +58,29 @@ class HomePageService
             throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
         }
     }
+     /**
+     * @param string $title
+     * @param string $videoId
+     * @return string
+     * @throws Exception
+     */
+    public function editDemoVideo(string $title, string $videoId)
+    {
+        try {
+            HomePageMaster::create(
+                [
+                    'title' => $title,
+                    'source_id' => $videoId,
+                    'type' => 'video'
+                ]
+            );
+            return "";
+        } catch (Exception $e) {
+            throw new Exception("Banner add Failed:" . $e->getMessage());
+        } catch (QueryException $e) {
+            throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
+        }
+    }
     /**
      * @param string $title
      * @param string $videoId
@@ -80,6 +103,7 @@ class HomePageService
             throw new Exception('Database error' . $e->errorInfo[2] ?? $e->getMessage());
         }
     }
+    
     /**
      * @return array $banner & videos urls 
      * @throws Exception

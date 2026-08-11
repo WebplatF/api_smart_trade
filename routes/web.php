@@ -94,9 +94,9 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/create', 'Coupon\CouponController@create');
         });
     });
-    $router->group(['prefix' => 'api/v1', 'middleware' => 'apikey'], function () use ($router) {
-        $router->get('/initial_data', 'Admin\HomePageController@initialData');
-    });
+    // $router->group(['prefix' => 'api/v1', 'middleware' => 'apikey'], function () use ($router) {
+    //     $router->get('/initial_data', 'Admin\HomePageController@initialData');
+    // });
     $router->group(['prefix' => 'admin/v1', 'middleware' => 'apikey'], function () use ($router) {
         $router->get('/initial_data', 'Admin\HomePageController@initialData');
         $router->post('/common/image_upload', ['middleware' => 'token', 'uses' => 'Admin\CommonController@imageUploadV1']);

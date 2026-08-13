@@ -11,6 +11,7 @@ class VideoListResources extends JsonResource
         return [
             'id' => $this->id,
             "title" => $this->title ?? "",
+            'order_sort' => $this->order_sort,
             'video_path' => $this->video != null ?  $this->video->video_id ?? "" : "",
              "durations" =>  $this->video != null ?  $this->video->durations ?? 0 : 0,
             'thumbnail_url' => $this->image->media_url ?? "",

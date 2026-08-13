@@ -20,6 +20,7 @@ class CourseVideoResources extends JsonResource
                 $this->watchHistory->last_time_stamp,
             "is_finshed" => $this->watchHistory == null ? false :
                 (bool)$this->watchHistory->is_finshed,
+            "created_at" => $this->created_at->toDateString() ?? ""
 
         ];
     }

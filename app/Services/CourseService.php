@@ -170,7 +170,7 @@ class CourseService
                 foreach ($shuffleList as $item) {
                     CourseVideos::where('id', $item['video_id'])
                         ->update([
-                            'sort_order' => $item['sort_order']
+                            'order_sort' => $item['sort_order']
                         ]);
                 }
             });

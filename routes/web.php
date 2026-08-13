@@ -83,7 +83,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/create', 'Admin\CourseController@courseCreation');
             $router->post('/lesson_create', 'Admin\CourseController@courseDetailCreation');
             $router->post('/video_map', 'Admin\CourseController@lessonVideoMap');
-            $router->post('/video_shuffle', 'Admin\CourseController@lessonVideoShuffle');
+            $router->patch('/video_shuffle', 'Admin\CourseController@lessonVideoShuffle');
             $router->post('/edit', 'Admin\CourseController@courseEdit');
             $router->post('/lesson_edit', 'Admin\CourseController@courseDetailEdit');
             $router->post('/action', 'Admin\CourseController@courseActions');

@@ -169,6 +169,7 @@ class CourseController extends Controller
                 'video_id' => 'required|strict_int',
                 'details_id' => 'required|strict_int',
                 'thumbnail_id' => 'required|strict_int',
+                'sort_order' => 'required|strict_int',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
@@ -177,7 +178,43 @@ class CourseController extends Controller
             $videoId = $request->get('video_id');
             $thumbnailId = $request->get('thumbnail_id');
             $title = $request->get('title');
-            $returnResponse = $this->courseService->mapCourseVideo(videoId: $videoId, detailId: $detailsId, thumbnailId: $thumbnailId, title: $title);
+            $sortOrder = $request->get('sort_order');
+            $returnResponse = $this->courseService->mapCourseVideo(
+                videoId: $videoId,
+                detailId: $detailsId,
+                thumbnailId: $thumbnailId,
+                title: $title,
+                orderSort: $sortOrder
+            );
+            return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function lessonVideoShuffle(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'shuffle_list' =>
+                'required|array|array_of_objects_with_schema:
+                    video_id:int,
+                    sort_order:int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $shuffleList = $request->get('shuffle_list');
+            $returnResponse = $this->courseService->shuffleCourseVideo(
+                shuffleList: $shuffleList
+            );
             return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());

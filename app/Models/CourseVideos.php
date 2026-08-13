@@ -13,6 +13,7 @@ class CourseVideos extends Model
         'title',
         'video_id',
         'thumbnail_id',
+        'order_sort',
         'is_delete'
     ];
 

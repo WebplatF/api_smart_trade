@@ -125,29 +125,33 @@ class CourseService
     }
     /**
      * @param int $detailId
+     * @param int $sortOrder
      * @param int $videoId
      * @return array $courseDetails
      * @throws Exception
      */
-    public function mapCourseVideo(int $detailId, int $videoId, int $thumbnailId, string $title)
+    public function mapCourseVideo(int $detailId, int $videoId, int $thumbnailId, string $title, int $orderSort)
     {
         try {
-            $course = CourseVideos::create([
-                'detail_id' => $detailId,
-                'video_id' => $videoId,
-                'title' => $title,
-                'thumbnail_id' => $thumbnailId
-            ]);
-            $return = CourseVideos::with('image', 'video')->find($course->id);
-            return [
-                'id' => $course->id,
-                'detail_id' => $detailId,
-                'title' => $title,
-                'video_id' => $videoId ?? "",
-                'video_path' => $return->video != null ?  $return->video->video_id ?? "" : "",
-                'thumbnail_id' => $thumbnailId,
-                'thumbnail_url' => $return->image->media_url ?? "",
-            ];
+            return DB::transaction(function () use ($detailId, $videoId, $title, $thumbnailId, $orderSort) {
+                $course = CourseVideos::create([
+                    'detail_id' => $detailId,
+                    'video_id' => $videoId,
+                    'title' => $title,
+                    'thumbnail_id' => $thumbnailId,
+                    'order_sort' => $orderSort
+                ]);
+                $return = CourseVideos::with('image', 'video')->find($course->id);
+                return [
+                    'id' => $course->id,
+                    'detail_id' => $detailId,
+                    'title' => $title,
+                    'video_id' => $videoId ?? "",
+                    'video_path' => $return->video != null ?  $return->video->video_id ?? "" : "",
+                    'thumbnail_id' => $thumbnailId,
+                    'thumbnail_url' => $return->image->media_url ?? "",
+                ];
+            });
         } catch (QueryException $e) {
             throw new Exception("Course Video Creation Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
@@ -155,15 +159,37 @@ class CourseService
         }
     }
     /**
+     * @param array $shuffleList
+     * @return array $courseDetails
+     * @throws Exception
+     */
+    public function shuffleCourseVideo(array $shuffleList)
+    {
+        try {
+            return DB::transaction(function () use ($shuffleList) {
+                foreach ($shuffleList as $item) {
+                    CourseVideos::where('id', $item['video_id'])
+                        ->update([
+                            'sort_order' => $item['sort_order']
+                        ]);
+                }
+            });
+        } catch (QueryException $e) {
+            throw new Exception("Course Video shuffled Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Course Video shuffled Failed :" . $e->getMessage());
+        }
+    }
+    /**
      * @param string $title
      * @param int $videoId
      * @throws Exception
      */
-    public function mapCourseTitleEdit(int $videoId,string $title)
+    public function mapCourseTitleEdit(int $videoId, string $title)
     {
         try {
-            $course = CourseVideos::where('is_delete',0)->where('id',$videoId)->first();
-            if(!$course){
+            $course = CourseVideos::where('is_delete', 0)->where('id', $videoId)->first();
+            if (!$course) {
                 throw new Exception("Course video invalid");
             }
             $course->update([

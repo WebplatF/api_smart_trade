@@ -72,36 +72,103 @@ class ValidationServiceProvider extends ServiceProvider
             if (!is_array($value)) return false;
             $schema = [];
             foreach ($parameters as $param) {
-                [$key, $type] = explode(':', $param);
+                [$key, $type] = array_map('trim', explode(':', $param));
                 $schema[$key] = $type;
             }
-            foreach ($value as $obj) {
+            foreach ($value as $index => $obj) {
                 if (!is_array($obj)) return false; // must be object
 
                 foreach ($schema as $key => $type) {
-                    if (!array_key_exists($key, $obj)) return false;
-
+                    if (!array_key_exists($key, $obj)) {
+                        app()->instance(
+                            'schema_field',
+                            "{$attribute}.{$index}.{$key}"
+                        );
+                        return false;
+                    }
                     $val = $obj[$key];
                     switch ($type) {
                         case 'string':
-                            if (!is_string($val)) return false;
+                            if (!is_string($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be string"
+                                );
+                                return false;
+                            };
                             break;
                         case 'int':
-                            if (!is_int($val)) return false;
+                            if (!is_int($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be integer"
+                                );
+                                return false;
+                            };
                             break;
                         case 'bool':
-                            if (!is_bool($val)) return false;
+                            if (!is_bool($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be boolean"
+                                );
+                                return false;
+                            };
                             break;
                         case 'array':
-                            if (!is_array($val)) return false;
+                            if (!is_array($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be array"
+                                );
+                                return false;
+                            };
+                            break;
+                        case 'double':
+                            if (!is_numeric($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be double"
+                                );
+                                return false;
+                            };
+                            break;
+                        case 'float':
+                            if (!is_float($val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be float"
+                                );
+                                return false;
+                            };
+                            break;
+                        case 'decimal':
+                            if (!preg_match('/^\d+(\.\d{1,15})?$/', (string)$val)) {
+                                app()->instance(
+                                    'schema_field',
+                                    "{$attribute}.{$index}.{$key} must be decimal"
+                                );
+                                return false;
+                            };
                             break;
                         default:
                             return false;
                     }
                 }
             }
-
             return true;
-        }, 'The :attribute  must be an array of objects with required schema.');
+        }, 'The :schema_field is required');
+        Validator::replacer(
+            'array_of_objects_with_schema',
+            function ($message) {
+                return str_replace(
+                    ':schema_field',
+                    app()->bound('schema_field')
+                        ? app('schema_field')
+                        : '',
+                    $message
+                );
+            }
+        );
     }
 }

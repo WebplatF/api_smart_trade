@@ -118,7 +118,7 @@ class HomePageService
             if (!$weekly) {
                 throw new Exception("Invalid weekly video");
             }
-            $weekly->unpadate([
+            $weekly->update([
                 [
                     'title' => $title,
                     'source_id' => $videoId,

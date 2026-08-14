@@ -139,7 +139,7 @@ class CourseService
                     'video_id' => $videoId,
                     'title' => $title,
                     'thumbnail_id' => $thumbnailId,
-                    'order_sort' => $orderSort
+                    'order_sort' => $orderSort ?? 0
                 ]);
                 $return = CourseVideos::with('image', 'video')->find($course->id);
                 return [

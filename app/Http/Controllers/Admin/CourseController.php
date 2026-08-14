@@ -184,7 +184,7 @@ class CourseController extends Controller
                 detailId: $detailsId,
                 thumbnailId: $thumbnailId,
                 title: $title,
-                orderSort: $sortOrder
+                orderSort: $sortOrder ?? 0
             );
             return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
         } catch (Throwable $e) {

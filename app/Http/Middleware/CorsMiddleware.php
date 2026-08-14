@@ -12,7 +12,8 @@ class CorsMiddleware
         $allowedOrigins = [
             'http://localhost:4200',
             'https://smarttradeind.com',
-            'https://admin.smarttradeind.com'
+            'https://admin.smarttradeind.com',
+            'https://testvideo-a88e3.web.app'
         ];
 
         $origin = $request->headers->get('Origin');

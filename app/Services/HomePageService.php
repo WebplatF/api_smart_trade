@@ -119,10 +119,8 @@ class HomePageService
                 throw new Exception("Invalid weekly video");
             }
             $weekly->update([
-                [
-                    'title' => $title,
-                    'source_id' => $videoId,
-                ]
+                'title' => $title,
+                'source_id' => $videoId,
             ]);
             return "";
         } catch (QueryException $e) {

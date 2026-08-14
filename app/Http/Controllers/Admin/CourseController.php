@@ -169,7 +169,7 @@ class CourseController extends Controller
                 'video_id' => 'required|strict_int',
                 'details_id' => 'required|strict_int',
                 'thumbnail_id' => 'required|strict_int',
-                'sort_order' => 'required|strict_int',
+                // 'sort_order' => 'required|strict_int',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);

@@ -32,7 +32,8 @@ class FileUploadV1Job extends Job implements ShouldQueue
         try {
             $url = config('AppConfig.kinescope_upload_url');
             $token = config('AppConfig.kinescope_api_key');
-            $parentId = config('AppConfig.kinescope_project_id');
+            $projectId = config('AppConfig.kinescope_project_id');
+            $parentId = config('AppConfig.kinescope_folder_id');
             $client = new Client();
             $response = $client->post(
                 $url,

@@ -11,8 +11,8 @@ return [
     'key_id' => env('KEY_ID', 'rzp_live_T9t2qGi9zsZGWA'),
     'key_secret' => env('KEY_SECRET', 'upO6gt9zLiZIjVqf64uotTXr'),
     'payment_secret' => env('PAYMENT_SECRET', 'WebSmart'),
-    'kinescope_api_key' => env('KINESCOPE_API_KEY', '7ab36ce9-407d-4b1d-9bfb-8a9d5128eaee'),
-    'kinescope_project_id' => env('KINESCOPE_PROJECT_ID', '9d422e20-fe29-4990-b561-43a79e35c6a7'),
+    'kinescope_api_key' => env('KINESCOPE_API_KEY', '5d2376d0-83e5-4176-bddd-f2e4028e456e'),
+    'kinescope_project_id' => env('KINESCOPE_PROJECT_ID', 'cc070d0f-ebbd-43f7-8447-080d3c4ebcf8'),
     'kinescope_upload_url' => env('KINESCOPE_UPLOAD_URL', 'https://uploader.kinescope.io/v2/video'),
     'kinescope_video_url' => env('KINESCOPE_VIDEO_URL', 'https://api.kinescope.io/v1/videos'),
 ];

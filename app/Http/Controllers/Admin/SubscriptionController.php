@@ -170,7 +170,7 @@ class SubscriptionController extends Controller
         $retunResponse = $this->subscriptionService->userSubscription(
             planId: $request->get('plan_id'),
             imageId: $request->get('image_id'),
-            code: $request->get('code'),
+            code: $request->get('code') ?? "",
             userId: (int)$request->get('user_id')
         );
         return ResponseHelper::successResponse(

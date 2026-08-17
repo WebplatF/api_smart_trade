@@ -66,4 +66,27 @@ class PaymentController extends Controller
             Log::error($e->getMessage());
         }
     }
+    public function ManuualAdd(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'id' => 'required|strict_int',
+                'in_id' => 'required|strict_int'
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $subId = $request->get('id');
+            $inId = $request->get('in_id');
+            $subscription = ["id" => $subId, "invoice_id" => $inId];
+            $response = $this->paymentService->updateSubscriptionOrder(
+                orderId: "svsajhbdas",
+                subscription: $subscription
+            );
+            return ResponseHelper::successResponse(data: $response, message: "Order is created", code: 200);
+        } catch (Throwable $e) {
+            Log::error($e->getMessage());
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
 }

@@ -157,6 +157,27 @@ class SubscriptionController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+    public function manualTest(Request $request)
+    {
+        $Validator = Validator::make($request->all(), [
+            'plan_id' => 'required|strict_int',
+            'image_id' => 'required|strict_int',
+            'user_id' => 'required|strict_int',
+        ]);
+        if ($Validator->fails()) {
+            return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+        }
+        $retunResponse = $this->subscriptionService->userSubscription(
+            planId: $request->get('plan_id'),
+            imageId: $request->get('image_id'),
+            code: $request->get('code'),
+            userId: (int)$request->get('user_id')
+        );
+        return ResponseHelper::successResponse(
+            data: $retunResponse,
+            message: "Subscription Data Arrived Successfully..!"
+        );
+    }
     /**
      * @param Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse

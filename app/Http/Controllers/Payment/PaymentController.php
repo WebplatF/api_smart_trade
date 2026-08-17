@@ -56,7 +56,6 @@ class PaymentController extends Controller
             Log::info($event);
             switch ($event) {
                 case 'payment.authorized':
-                    // Handle authorized payment
                     $this->paymentService->updatePaymentDetails(data: $data);
                     break;
                 case 'payment.captured':
@@ -66,27 +65,5 @@ class PaymentController extends Controller
         } catch (Throwable $e) {
             Log::error($e->getMessage());
         }
-    }
-    public function getInvoice()
-    {
-        $html = view('invoice')->render();
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-        $pdf = $dompdf->output();
-        Mail::raw("Please find inovice", function ($message) use ($pdf) {
-            $message->to('mukiloffice@gmail.com')
-                ->subject('Invoice')
-                ->attachData(
-                    $pdf,
-                    'invoice.pdf',
-                    [
-                        'mime' => 'application/pdf',
-                    ]
-                );
-        });
-        return response($html)
-            ->header('Content-Type', 'text/html');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\InvoiceDetails;
+use App\Models\InvoiceMaster;
 use App\Models\TransactionMaster;
 use App\Models\UserSubscription;
 use App\ResponseModel\OrderResponseModel;
@@ -9,6 +11,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentService
@@ -103,7 +106,7 @@ class PaymentService
                             'payment_order_id' => $orderId,
                             'payment_id' => $paymentId
                         ]);
-                    break;    
+                        break;
                     case "Payment Pending":
                         $transaction->update([
                             'status' => "Payment Completed",
@@ -115,14 +118,14 @@ class PaymentService
                             throw new Exception("Invalid order");
                         }
                         $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
-                    break; 
+                        break;
                     case "Payment Completed":
                         $subscription = UserSubscription::where('order_id', $orderId)->where('status', 'pending')->first();
                         if (!$subscription) {
                             throw new Exception("Invalid order");
                         }
                         $this->subscriptionService->subscriptionAction(id: $subscription->id, action: "approved", reason: "");
-                    break;    
+                        break;
                 }
             }
         } catch (QueryException $e) {
@@ -164,13 +167,48 @@ class PaymentService
     public function updateSubscriptionOrder(array $subscription, string $orderId)
     {
         try {
-            $sub = UserSubscription::find($subscription['id']);
-            if (!$sub) {
-                throw new Exception("Invalid subscription");
-            }
-            $sub->update([
-                'order_id' => $orderId
-            ]);
+            DB::transaction(function () use ($subscription, $orderId) {
+                $sub = UserSubscription::find($subscription['id']);
+                if (!$sub) {
+                    throw new Exception("Invalid subscription");
+                }
+                $sub->update([
+                    'order_id' => $orderId
+                ]);
+                $invoice = InvoiceMaster::where('is_delete', 0)->find($subscription['invoice_id']);
+                if ($invoice) {
+                    if ($invoice->order_id == null) {
+                        $invoice->update([
+                            'order_id' => $orderId
+                        ]);
+                        $details = InvoiceDetails::with('userSubscription')->where('is_delete')->get();
+                        $subTotal = 0;
+                        foreach ($details as $detail) {
+                            if ($detail->userSubscription) {
+                                $amount = (float) $detail->userSubscription->amount;
+                                $subTotal += $amount;
+                            }
+                        }
+                        $discountAmount = 0;
+                        if ($invoice->discount_type === 'percentage') {
+                            $discountAmount = ($subTotal * (float) $invoice->discount) / 100;
+                        } else {
+                            $discountAmount = (float) $invoice->discount;
+                        }
+                        $taxPercentage = 18;
+                        $taxAmount = ($subTotal * $taxPercentage) / 100;
+                        $grandTotal = $subTotal + $taxAmount - $discountAmount;
+                        $invoice->update([
+                            'sub_total'   => $subTotal,
+                            'grand_total' => $grandTotal,
+                        ]);
+                    } else {
+                        $invoice->update([
+                            'order_id' => $orderId
+                        ]);
+                    }
+                }
+            });
         } catch (QueryException $e) {
             throw new Exception($e->errorInfo[2] ?? $e->getMessage());
         } catch (Exception $e) {

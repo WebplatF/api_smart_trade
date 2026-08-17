@@ -21,6 +21,9 @@ $router->group(['prefix' => 'payment', 'middleware' => 'payment'], function () u
     $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
 $router->get('/invoice', 'Payment\PaymentController@getInvoice');
+$router->post('/create_invoice', 'Admin\SubscriptionController@manualTest');
+
+
 $router->group(['prefix' => 'webhooks'], function () use ($router) {
     $router->post('/video_status', 'Webhooks\WebhooksController@videoStatusUpdate');
 });

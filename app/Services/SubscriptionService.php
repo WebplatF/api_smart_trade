@@ -2,15 +2,23 @@
 
 namespace App\Services;
 
+use App\Helper\DatabaseErrorHelper;
+use App\Models\CouponMaster;
+use App\Models\InvoiceDetails;
+use App\Models\InvoiceMaster;
+use App\Models\InvoiceSequence;
 use App\Models\SubscriptionMaster;
+use App\Models\UserMaster;
 use App\Models\UserSubscription;
 use App\Resources\SubscriptionResources;
 use App\Resources\UserSubscriptionResources;
 use App\ResponseModel\UserSubscriptionListResponseModel;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
 use Exception;
 use Illuminate\Database\QueryException;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class SubscriptionService
 {
@@ -125,62 +133,69 @@ class SubscriptionService
         string $code = ''
     ) {
         try {
-            $now = Carbon::now();
-            $subscription = SubscriptionMaster::findOrFail($planId);
-            if (!$subscription) {
-                throw new Exception('Plan is not in database');
-            }
-            $runningSubscription = UserSubscription::where('user_id', $userId)
-                ->where('status', 'approved')
-                ->where('is_delete', 0)
-                ->where('end_date', '>=', $now)
-                ->first();
-            if ($runningSubscription) {
-                throw new Exception('Already some plan subscription is going');
-            }
-            $subscriptions = UserSubscription::where('user_id', $userId)
-                ->where('subscription_id', $planId)
-                ->where('is_delete', 0)
-                ->first();
-            if ($subscriptions) {
-                if ($subscriptions->status == 'pending') {
-                    // throw new Exception('Already this subscription waiting for admin approval');
-                    return  [
-                        "id" => $subscriptions->id,
-                        "status" => $subscriptions->status ?? "pending"
+            DB::transaction(function () use ($planId, $imageId, $userId, $code) {
+                $now = Carbon::now();
+                $subscription = SubscriptionMaster::findOrFail($planId);
+                if (!$subscription) {
+                    throw new Exception('Plan is not in database');
+                }
+                $runningSubscription = UserSubscription::where('user_id', $userId)
+                    ->where('status', 'approved')
+                    ->where('is_delete', 0)
+                    ->where('end_date', '>=', $now)
+                    ->first();
+                if ($runningSubscription) {
+                    throw new Exception('Already some plan subscription is going');
+                }
+                $subscriptions = UserSubscription::where('user_id', $userId)
+                    ->where('subscription_id', $planId)
+                    ->where('is_delete', 0)
+                    ->first();
+                if ($subscriptions) {
+                    if ($subscriptions->status == 'pending') {
+                        $invoiceDetails = InvoiceDetails::where('is_delete')->where('user_sub_id', $subscriptions->id)->first();
+                        // throw new Exception('Already this subscription waiting for admin approval');
+                        return  [
+                            "id" => $subscriptions->id,
+                            "status" => $subscriptions->status ?? "pending",
+                            "invoice_id" => $invoiceDetails->invoice_id
+                        ];
+                    }
+                    if ($subscriptions->status == 'approved') {
+                        throw new Exception('Already subscription is available renewable from admin');
+                    }
+                    if ($subscriptions->status == 'rejected') {
+                        $invoiceDetails = InvoiceDetails::where('is_delete')->where('user_sub_id', $subscriptions->id)->first();
+                        $subscriptions->update([
+                            'status' => 'pending',
+                            'imageid' => $imageId
+                        ]);
+                        return  [
+                            "id" => $subscriptions->id,
+                            "status" => $subscriptions->status ?? "pending",
+                            "invoice_id" => $invoiceDetails->invoice_id
+                        ];
+                    }
+                } else {
+                    $userSubscription = UserSubscription::create(
+                        [
+                            'user_id' => $userId,
+                            'subscription_id' => $planId,
+                            'image_id' => $imageId,
+                            'plan_name' => $subscription->plan_name ?? "",
+                            'amount' => $subscription->amount ?? "",
+                            'duration' => $subscription->duration ?? "",
+                            'coupon' => $code ?? "",
+                        ]
+                    );
+                    $inovice = $this->invoiceCreate(userId: $userId, code: $code, userSubId: $userSubscription->id);
+                    return [
+                        "id" => $userSubscription->id,
+                        "status" => $userSubscription->status ?? "pending",
+                        "invoice_id" => $inovice["invoice_id"]
                     ];
                 }
-                if ($subscriptions->status == 'approved') {
-                    throw new Exception('Already subscription is available renewable from admin');
-                }
-                if ($subscriptions->status == 'rejected') {
-
-                    $subscriptions->update([
-                        'status' => 'pending',
-                        'imageid' => $imageId
-                    ]);
-                    return  [
-                        "id" => $subscriptions->id,
-                        "status" => $subscriptions->status ?? "pending"
-                    ];
-                }
-            } else {
-                $userSubscription = UserSubscription::create(
-                    [
-                        'user_id' => $userId,
-                        'subscription_id' => $planId,
-                        'image_id' => $imageId,
-                        'plan_name' => $subscription->plan_name ?? "",
-                        'amount' => $subscription->amount ?? "",
-                        'duration' => $subscription->duration ?? "",
-                        'coupon' => $code ?? "",
-                    ]
-                );
-                return [
-                    "id" => $userSubscription->id,
-                    "status" => $userSubscription->status ?? "pending"
-                ];
-            }
+            });
         } catch (QueryException $e) {
             throw new Exception('Subscription  Failed :' . $e->errorInfo[2] ?? $e->getMessage());
         } catch (Exception $e) {
@@ -260,6 +275,90 @@ class SubscriptionService
             throw new Exception('Subscription List Failed :' . $e->errorInfo[2] ?? $e->getMessage());
         } catch (Exception $e) {
             throw new Exception("Subscription List Failed :" . $e->getMessage());
+        }
+    }
+
+    public function invoiceCreate(int $userId, string $code, int $userSubId): object
+    {
+        try {
+            return DB::transaction(function () use ($userId, $code, $userSubId) {
+                $discount = 0;
+                $type = null;
+                if ($code != '') {
+                    $dis = CouponMaster::where('is_delete', 0)->where('code', $code)->first();
+                    if ($dis) {
+                        $discount = (float)$dis->value;
+                        $type = $dis->discount_type;
+                    }
+                }
+                $invoice = InvoiceMaster::create([
+                    'invoice_no' => $this->generateInvoiceNo(),
+                    'user_id' => $userId,
+                    'discount' => $discount,
+                    'discount_type' => $discount == 0 ? "" : $type,
+                    'sub_total' => '0',
+                    'tax' => '18',
+                    'grand_total' => '0',
+                ]);
+                $ivoiceDetails = InvoiceDetails::create([
+                    'invoice_id' => $invoice->id,
+                    'user_sub_id' => $userSubId,
+                ]);
+                return (object)[
+                    'invoice_id' => $invoice->id,
+                ];
+            });
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception("Invoice creation Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Inovice No Generation
+     *
+     * @return void
+     */
+    public function generateInvoiceNo()
+    {
+        $sequence = InvoiceSequence::create();
+        return 'SMTA-IN-' . str_pad($sequence->id, 3, '0', STR_PAD_LEFT);
+    }
+    public function getInvoice()
+    {
+        $html = view('invoice')->render();
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $pdf = $dompdf->output();
+        Mail::raw("Please find inovice", function ($message) use ($pdf) {
+            $message->to('mukiloffice@gmail.com')
+                ->subject('Invoice for Your Smart Trade Subscription Purchase')
+                ->attachData(
+                    $pdf,
+                    'invoice.pdf',
+                    [
+                        'mime' => 'application/pdf',
+                    ]
+                );
+        });
+        return response($html)
+            ->header('Content-Type', 'text/html');
+    }
+    public function userDetailsSubscription(int $userId, int $subId)
+    {
+        try {
+            $user = UserMaster::where('is_delete', 0)->find($userId);
+            $invoiceDetails = InvoiceDetails::where('is_delete', 0)->where('user_sub_id', $subId)->first();
+            $invoice = InvoiceMaster::where('is_delete', 0)->find($invoiceDetails->invoice_id);
+            return [
+                "user" => $user,
+                "invoice" => $invoice,
+                "invoice_details" => $invoiceDetails
+            ];
+        } catch (QueryException $e) {
+        } catch (Exception $e) {
         }
     }
 }

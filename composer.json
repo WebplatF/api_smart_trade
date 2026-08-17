@@ -7,7 +7,9 @@
     "require": {
         "php": "^8.0",
         "aws/aws-sdk-php": "^3.370",
+        "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "3.10",
+        "dompdf/dompdf": "^3.1",
         "firebase/php-jwt": "6.11",
         "fruitcake/laravel-cors": "^3.0",
         "illuminate/mail": "^9.52",

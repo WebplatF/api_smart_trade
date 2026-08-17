@@ -6,9 +6,11 @@ use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\TransactionMaster;
 use App\Services\PaymentService;
+use Dompdf\Dompdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -55,14 +57,36 @@ class PaymentController extends Controller
             switch ($event) {
                 case 'payment.authorized':
                     // Handle authorized payment
-                    $this->paymentService->updatePaymentDetails(data:$data);
+                    $this->paymentService->updatePaymentDetails(data: $data);
                     break;
                 case 'payment.captured':
-                     $this->paymentService->updatePaymentDetails(data:$data);
+                    $this->paymentService->updatePaymentDetails(data: $data);
                     break;
             }
         } catch (Throwable $e) {
             Log::error($e->getMessage());
         }
+    }
+    public function getInvoice()
+    {
+        $html = view('invoice')->render();
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $pdf = $dompdf->output();
+        Mail::raw("Please find inovice", function ($message) use ($pdf) {
+            $message->to('mukiloffice@gmail.com')
+                ->subject('Invoice')
+                ->attachData(
+                    $pdf,
+                    'invoice.pdf',
+                    [
+                        'mime' => 'application/pdf',
+                    ]
+                );
+        });
+        return response($html)
+            ->header('Content-Type', 'text/html');
     }
 }

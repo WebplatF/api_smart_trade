@@ -181,6 +181,29 @@ class CourseService
         }
     }
     /**
+     * @param string $path
+     * @return string $cdnUrl
+     * @throws Exception
+     */
+    public function videoThumbnailChange(string $id, int $thumb)
+    {
+        try {
+            DB::transaction(function () use ($id, $thumb) {
+                $video = CourseVideos::where('is_delete', 0)->find($id);
+                if ($video) {
+                    $video->update([
+                        'thumbnail_id' => $thumb
+                    ]);
+                } else {
+                    // handle not found
+                    throw new Exception("Invalid Video Id");
+                }
+            });
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
      * @param string $title
      * @param int $videoId
      * @throws Exception

@@ -20,6 +20,7 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix' => 'payment', 'middleware' => 'payment'], function () use ($router) {
     $router->post('/capture', 'Payment\PaymentController@paymentCapture');
 });
+$router->get('/invoice', 'Payment\PaymentController@getInvoice');
 $router->group(['prefix' => 'webhooks'], function () use ($router) {
     $router->post('/video_status', 'Webhooks\WebhooksController@videoStatusUpdate');
 });
@@ -85,6 +86,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/video_map', 'Admin\CourseController@lessonVideoMap');
             $router->patch('/video_shuffle', 'Admin\CourseController@lessonVideoShuffle');
             $router->post('/edit', 'Admin\CourseController@courseEdit');
+            $router->post('/video_thumbnail', 'Admin\CourseController@editVideoThumbnail');
             $router->post('/lesson_edit', 'Admin\CourseController@courseDetailEdit');
             $router->post('/action', 'Admin\CourseController@courseActions');
             $router->patch('/video_delete', 'Admin\CourseController@lessonVideoStatusUpdate');

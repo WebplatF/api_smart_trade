@@ -14,6 +14,7 @@ class CourseVideoResources extends JsonResource
             "image" => $this->image->media_url ?? "",
             "video" => $this->video->video_id ?? "",
             "durations" => $this->video->durations ?? 0,
+            'order_sort' => $this->order_sort ?? 0,
             "is_watch" => $this->watchHistory == null ? false :
                 (bool)$this->watchHistory->is_watch,
             "last_time_stamp" => $this->watchHistory == null ? 0 :

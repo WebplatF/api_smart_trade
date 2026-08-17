@@ -153,7 +153,7 @@ class SubscriptionService
                     ->first();
                 if ($subscriptions) {
                     if ($subscriptions->status == 'pending') {
-                        $invoiceDetails = InvoiceDetails::where('is_delete')->where('user_sub_id', $subscriptions->id)->first();
+                        $invoiceDetails = InvoiceDetails::where('is_delete',0)->where('user_sub_id', $subscriptions->id)->first();
                         // throw new Exception('Already this subscription waiting for admin approval');
                         return  [
                             "id" => $subscriptions->id,
@@ -165,7 +165,7 @@ class SubscriptionService
                         throw new Exception('Already subscription is available renewable from admin');
                     }
                     if ($subscriptions->status == 'rejected') {
-                        $invoiceDetails = InvoiceDetails::where('is_delete')->where('user_sub_id', $subscriptions->id)->first();
+                        $invoiceDetails = InvoiceDetails::where('is_delete',0)->where('user_sub_id', $subscriptions->id)->first();
                         $subscriptions->update([
                             'status' => 'pending',
                             'imageid' => $imageId

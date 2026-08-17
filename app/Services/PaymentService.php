@@ -181,7 +181,7 @@ class PaymentService
                         $invoice->update([
                             'order_id' => $orderId
                         ]);
-                        $details = InvoiceDetails::with('userSubscription')->where('is_delete')->get();
+                        $details = InvoiceDetails::with('userSubscription')->where('is_delete', 0)->get();
                         $subTotal = 0;
                         foreach ($details as $detail) {
                             if ($detail->userSubscription) {
@@ -190,9 +190,9 @@ class PaymentService
                             }
                         }
                         $discountAmount = 0;
-                        if ($invoice->discount_type === 'percentage') {
+                        if ($invoice->discount_type === 'Percentage') {
                             $discountAmount = ($subTotal * (float) $invoice->discount) / 100;
-                        } else {
+                        } else if ($invoice->discount_type === 'Flat') {
                             $discountAmount = (float) $invoice->discount;
                         }
                         $taxPercentage = 18;

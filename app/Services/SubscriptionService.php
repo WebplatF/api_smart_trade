@@ -192,7 +192,7 @@ class SubscriptionService
                     return [
                         "id" => $userSubscription->id,
                         "status" => $userSubscription->status ?? "pending",
-                        "invoice_id" => $inovice["invoice_id"]
+                        "invoice_id" => $inovice->invoice_id
                     ];
                 }
             });

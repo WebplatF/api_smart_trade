@@ -133,7 +133,7 @@ class SubscriptionService
         string $code = ''
     ) {
         try {
-            DB::transaction(function () use ($planId, $imageId, $userId, $code) {
+          return  DB::transaction(function () use ($planId, $imageId, $userId, $code) {
                 $now = Carbon::now();
                 $subscription = SubscriptionMaster::findOrFail($planId);
                 if (!$subscription) {

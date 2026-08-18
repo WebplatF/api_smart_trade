@@ -10,13 +10,13 @@ class InvoiceDetailsResources extends JsonResource
     {
         return [
             "id" => $this->id,
-            "subscription" => $this->user_subscription != null ? [
+            "subscription" => $this->user_subscription == null ? null : [
                 "id" => $this->user_subscription->id,
                 "subscription_id" =>  $this->subscription_id,
                 "plan_name" =>  $this->plan_name ?? "",
                 "amount" => $this->amount ?? "0",
                 "validity" => $this->validity ??  "",
-            ] : null
+            ]
         ];
     }
 }

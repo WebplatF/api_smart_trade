@@ -93,14 +93,14 @@ class UserController extends Controller
                 return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
             }
             $Validator = Validator::make($request->all(), [
-                'user_id' => 'required|strict_int',
+                'id' => 'required|strict_int',
                 'status' => 'required|strict_bool',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
             $retunResponse = $this->userService->statusUpdate(
-                userId: $request->get('user_id'),
+                userId: $request->get('id'),
                 status: $request->get('status')
             );
             return ResponseHelper::successResponse(

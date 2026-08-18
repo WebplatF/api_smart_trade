@@ -192,12 +192,15 @@ class PaymentService
                         $discountAmount = 0;
                         if ($invoice->discount_type === 'Percentage') {
                             $discountAmount = ($subTotal * (float) $invoice->discount) / 100;
-                        } else if ($invoice->discount_type === 'Flat') {
+                        } elseif ($invoice->discount_type === 'Flat') {
                             $discountAmount = (float) $invoice->discount;
                         }
+                        // Amount after discount
+                        $taxableAmount = $subTotal - $discountAmount;
                         $taxPercentage = 18;
-                        $taxAmount = ($subTotal * $taxPercentage) / 100;
-                        $grandTotal = $subTotal + $taxAmount - $discountAmount;
+                        // GST calculated after discount
+                        $taxAmount = ($taxableAmount * $taxPercentage) / 100;
+                        $grandTotal = $taxableAmount + $taxAmount;
                         $invoice->update([
                             'sub_total'   => $subTotal,
                             'grand_total' => $grandTotal,

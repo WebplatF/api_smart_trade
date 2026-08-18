@@ -35,7 +35,7 @@ class ValidationServiceProvider extends ServiceProvider
         Validator::extend('array_of_ints', function ($attribute, $value) {
             if (!is_array($value)) return false;
             foreach ($value as $v) {
-                if (!is_string($v)) return false;
+                if (!is_int($v)) return false;
             }
             return true;
         }, 'The :attribute  must be an array of integers.');

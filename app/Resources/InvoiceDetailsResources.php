@@ -16,6 +16,7 @@ class InvoiceDetailsResources extends JsonResource
                 "plan_name" =>  $this->userSubscription->plan_name ?? "",
                 "amount" => $this->userSubscription->amount ?? "0",
                 "validity" => $this->userSubscription->validity ??  "",
+                "duration" => $this->userSubscription->duration ??  "",
             ]
         ];
     }

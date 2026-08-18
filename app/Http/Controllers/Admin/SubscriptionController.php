@@ -266,7 +266,7 @@ class SubscriptionController extends Controller
             $userId = $request->get('user_id');
             $subId = $request->get('sub_id');
             $returnResponse = $this->subscriptionService->getInvoice(userId: $userId, subId: $subId);
-            return ResponseHelper::successResponse(data: $returnResponse, message: "User Details");
+            // return ResponseHelper::successResponse(data: $returnResponse, message: "User Details");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }

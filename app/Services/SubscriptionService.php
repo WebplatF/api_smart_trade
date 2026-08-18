@@ -329,7 +329,10 @@ class SubscriptionService
     }
     public function getInvoice(int $userId, int $subId)
     {
-        $invoiceDetails = $this->userDetailsSubscription(userId: $userId, subId: $subId);
+        $invoiceDetails = $this->userDetailsSubscription(
+            userId: $userId,
+            subId: $subId
+        );
         $html = view('invoice', [
             'data' => $invoiceDetails
         ])->render();
@@ -338,22 +341,29 @@ class SubscriptionService
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
         $pdf = $dompdf->output();
-        $fileName = $invoiceDetails->invoice->invoice_no . '.pdf';
-        Mail::raw("Please find inovice", function ($message) use ($pdf, $fileName) {
-            $message->to('mukiloffice@gmail.com')
-                ->subject('Invoice for Your Smart Trade Subscription Purchase')
-                ->attachData(
-                    $pdf,
-                    $fileName,
-                    [
-                        'mime' => 'application/pdf',
-                    ]
-                );
-        });
+        $fileName =
+            ($invoiceDetails['invoice']['invoice_no'] ?? 'invoice')
+            . '.pdf';
+        Mail::raw(
+            'Please find the attached invoice for your Smart Trade subscription purchase.',
+            function ($message) use ($pdf, $fileName) {
+                $message->to('mukiloffice@gmail.com')
+                    ->subject(
+                        'Invoice for Your Smart Trade Subscription Purchase'
+                    )
+                    ->attachData(
+                        $pdf,
+                        $fileName,
+                        [
+                            'mime' => 'application/pdf',
+                        ]
+                    );
+            }
+        );
         return response($html)
             ->header('Content-Type', 'text/html');
     }
-    public function userDetailsSubscription(int $userId, int $subId): object
+    public function userDetailsSubscription(int $userId, int $subId)
     {
         try {
             $user = UserMaster::where('is_delete', 0)->find($userId);
@@ -362,7 +372,7 @@ class SubscriptionService
             $invoiceUser = InvoiceUserResources::make($user)->resolve();
             $invoiceMaster = InvoiceMasterResources::make($invoice)->resolve();
             $invoiceDet = InvoiceDetailsResources::make($invoiceDetails)->resolve();
-            return (object)[
+            return [
                 "user" => $invoiceUser,
                 "invoice" => $invoiceMaster,
                 "invoice_details" => $invoiceDet

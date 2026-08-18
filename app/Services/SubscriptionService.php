@@ -350,7 +350,7 @@ class SubscriptionService
     {
         try {
             $user = UserMaster::where('is_delete', 0)->find($userId);
-            $invoiceDetails = InvoiceDetails::where('is_delete', 0)->where('user_sub_id', $subId)->first();
+            $invoiceDetails = InvoiceDetails::with('userSubscription')->where('is_delete', 0)->where('user_sub_id', $subId)->first();
             $invoice = InvoiceMaster::where('is_delete', 0)->find($invoiceDetails->invoice_id);
             return [
                 "user" => $user,

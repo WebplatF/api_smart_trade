@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helper\DatabaseErrorHelper;
 use App\Models\StaffMaster;
 use App\Models\UserMaster;
 use App\Models\UserSubscription;
@@ -215,6 +216,31 @@ class UserService
             throw new Exception('Video Stream Update Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
             throw new Exception("Video Stream Update Failed :" . $e->getMessage());
+        }
+    }
+
+    public function userNotSubscription()
+    {
+        try {
+            $now = Carbon::now();
+            $users = UserMaster::whereDoesntHave('subscriptions', function ($query) use ($now) {
+                $query->where('status', 'approved')
+                    ->where('is_delete', 0)
+                    ->where('end_date', '>=', $now);
+            })
+                ->where('is_delete', 0)
+                ->paginate(20);
+            $userList = UsersResources::collection($users->items())->resolve();
+            $response = new UserSubscriptionListResponseModel(
+                currentPage: $users->currentPage(),
+                totalRecords: $users->total(),
+                userList: $userList
+            );
+            return $response->toArray();
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e);
         }
     }
 }

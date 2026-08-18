@@ -73,6 +73,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->get('/image_list', 'Admin\CommonController@getImageList');
         $router->get('/video_list', 'Admin\CommonController@getVideoList');
         $router->get('/user_list', 'User\UserController@userList');
+        $router->get('/user_subscription', 'User\UserController@userNotSubscription');
         $router->post('/user_action', 'User\UserController@userStatusUpdate');
         $router->get('/home_builder', 'Admin\HomePageController@homebuilderData');
         $router->group(['prefix' => 'subscription'], function () use ($router) {

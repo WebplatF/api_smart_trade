@@ -202,4 +202,22 @@ class UserController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userNotSubscription(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $userList = $this->userService->userNotSubscription();
+            return ResponseHelper::successResponse(data: $userList, message: "User List Data Arrived Successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
 }

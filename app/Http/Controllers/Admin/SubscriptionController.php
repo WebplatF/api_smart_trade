@@ -290,8 +290,8 @@ class SubscriptionController extends Controller
             $planId = $request->get('plan_id');
             $userList = $request->input('user_list');
             $tag = $request->input('tag');
-            $startDate = $request->input('start_date');
-            $endDate = $request->input('end_date');
+            $startDate = $request->input('start_date') ?? "";
+            $endDate = $request->input('end_date') ?? "";
             $this->subscriptionService->manualUserSubscription(planId: $planId, userList: $userList, tag: $tag, startDate: $startDate, endDate: $endDate);
             return ResponseHelper::successResponse(message: "Mannual subscription is added to selected users successfully...!");
         } catch (Throwable $e) {

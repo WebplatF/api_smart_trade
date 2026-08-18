@@ -448,6 +448,7 @@ class SubscriptionService
                         'plan_name'       => $subscription->plan_name ?? '',
                         'amount'          => $subscription->amount ?? 0,
                         'duration'        => $subscription->duration ?? 0,
+                        'validity' => $subscription->validity ?? "",
                         'coupon'          => '',
                         'start_date'      => $pStartDate->toDateString(),
                         'renew_date'      => $pEndDate->toDateString(),

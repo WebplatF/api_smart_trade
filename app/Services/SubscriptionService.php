@@ -347,7 +347,7 @@ class SubscriptionService
         Mail::raw(
             'Please find the attached invoice for your Smart Trade subscription purchase.',
             function ($message) use ($pdf, $fileName) {
-                $message->to('mukiloffice@gmail.com')
+                $message->to('webplatf@gmail.com')
                     ->subject(
                         'Invoice for Your Smart Trade Subscription Purchase'
                     )

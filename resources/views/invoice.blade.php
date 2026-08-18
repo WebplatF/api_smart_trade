@@ -376,7 +376,7 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     $items = [
 
     [
-    'description' => $planName . ' - ' . $duration . ' - ' . $validity,
+    'description' => $planName . ' - ' . $duration . $validity,
 
     'qty' =>
     1,

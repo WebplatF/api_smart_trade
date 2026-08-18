@@ -21,4 +21,8 @@ class UserMaster extends Model
     protected $casts = [
         'login_ip' => 'array', // auto decode JSON
     ];
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class, 'user_id', 'id');
+    }
 }

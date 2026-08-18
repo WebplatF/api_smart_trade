@@ -78,19 +78,19 @@ $negative = $num < 0; $num=abs($num); $parts=explode('.', number_format($num, 2,
     // ],
     // 'cgstRate' => 9, 'sgstRate' => 9,
     // ]]);
-    $invoiceNo = $data['invoice']['invoice_no'];
-    $invoiceDate =$data['invoice']['created_at'];
+    $invoiceNo = $data['invoice']->invoice_no;
+    $invoiceDate =$data['invoice']->created_at;
     // $invoiceNo = $invoice['invoiceNo'] ?? 'SMTA-IN-001';
     // $invoiceDate = $invoice['invoiceDate'] ?? '';
     // $invoiceTerms = $invoice['invoiceTerms'] ?? '';
-    $custName = $data['user']['name'];
-    $custMobile = $data['user']['mobile'];
-    $custEmail = $data['user']['email'];
+    $custName = $data['user']->name;
+    $custMobile = $data['user']->mobile;
+    $custEmail = $data['user']->email;
     // $custName = $invoice['customer']['name'] ?? '';
     // $custMobile = $invoice['customer']['mobile'] ?? '';
     // $custEmail = $invoice['customer']['email'] ?? '';
-    $items = [['description'=>$data['invoice_details']['subscription']['plan_name'],
-    'qty'=>1,'amount'=>$data['invoice_details']['subscription']['amount']]];
+    $items = [['description'=>$data['invoice_details']->subscription->plan_name,
+    'qty'=>1,'amount'=>$data['invoice_details']->subscription->amount]];
 
     // Accept the new `items` array, or fall back to the old single `item`.
     // $items = $invoice['items'] ?? (isset($invoice['item']) ? [$invoice['item']] : []);
@@ -107,7 +107,7 @@ $negative = $num < 0; $num=abs($num); $parts=explode('.', number_format($num, 2,
     // foreach ($items as $it) {
     // $itemsTotal += (float) ($it['amount'] ?? 0);
     // }
-    $itemsTotal = $data['invoice']['grand_total'];
+    $itemsTotal = $data['invoice']->grand_total;
 
     // $cgst = $itemsTotal * $cgstRate / 100;
     // $sgst = $itemsTotal * $sgstRate / 100;

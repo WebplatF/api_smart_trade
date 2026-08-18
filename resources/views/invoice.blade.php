@@ -89,8 +89,8 @@ $negative = $num < 0; $num=abs($num); $parts=explode('.', number_format($num, 2,
     // $custName = $invoice['customer']['name'] ?? '';
     // $custMobile = $invoice['customer']['mobile'] ?? '';
     // $custEmail = $invoice['customer']['email'] ?? '';
-    $items = [['description'=>$data['invoice_details']->subscription->plan_name,
-    'qty'=>1,'amount'=>$data['invoice_details']->subscription->amount]];
+   // $items = [['description'=>$data['invoice_details']->subscription->plan_name,
+    //'qty'=>1,'amount'=>$data['invoice_details']->subscription->amount]];
 
     // Accept the new `items` array, or fall back to the old single `item`.
     // $items = $invoice['items'] ?? (isset($invoice['item']) ? [$invoice['item']] : []);
@@ -447,7 +447,7 @@ $negative = $num < 0; $num=abs($num); $parts=explode('.', number_format($num, 2,
                     </thead>
                     <tbody>
                         {{-- One plain row per JSON item — Sl.No / Description / Qty / Amount --}}
-                        @foreach($items as $index => $it)
+                        {{-- @foreach($items as $index => $it)
                         <tr>
                             <td class="sl-cell">{{ $index + 1 }}.</td>
                             <td class="desc-cell">{{ $it['description'] ?? '' }}</td>
@@ -460,7 +460,7 @@ $negative = $num < 0; $num=abs($num); $parts=explode('.', number_format($num, 2,
                             <td></td>
                             <td></td>
                             <td></td>
-                        </tr>
+                        </tr> --}}
                         {{-- From here down, columns 1-2 are merged (rowspan) across the
              filler + tax rows, exactly like the original single-item
              layout, so the watermark area and tax block look unchanged. --}}

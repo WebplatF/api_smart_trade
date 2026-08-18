@@ -13,7 +13,7 @@ class InvoiceUserResources extends JsonResource
             "id" => $this->id,
             "name" =>  $this->name ?? "",
             "email" => $this->email ??  "",
-            "mobile" =>  $this->email ?? ""
+            "mobile" =>  $this->mobile ?? ""
         ];
     }
 }

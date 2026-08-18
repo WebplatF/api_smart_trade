@@ -344,10 +344,11 @@ class SubscriptionService
         $fileName =
             ($invoiceDetails['invoice']['invoice_no'] ?? 'invoice')
             . '.pdf';
+        $email =  $invoiceDetails['user']['email'];
         Mail::raw(
             'Please find the attached invoice for your Smart Trade subscription purchase.',
-            function ($message) use ($pdf, $fileName) {
-                $message->to('webplatf@gmail.com')
+            function ($message) use ($pdf, $fileName, $email) {
+                $message->to($email)
                     ->subject(
                         'Invoice for Your Smart Trade Subscription Purchase'
                     )

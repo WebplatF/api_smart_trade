@@ -7,13 +7,11 @@
 */
 
 if (!function_exists('formatINR')) {
-
 function formatINR($num)
 {
 $num = round((float) $num, 2);
 
-$negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 2, '.' , '' ) ); $intPart=$parts[0]; $decPart=$parts[1]; $lastThree=substr( $intPart, -3 ); $other=substr( $intPart, 0, -3 ); if ($other !=='' ) { $other=preg_replace( '/\B(?=(\d{2})+(?!\d))/' , ',' , $other ); $lastThree=',' . $lastThree; } $formatted=($negative ? '-' : '' ) . $other . $lastThree; if ((float) $decPart> 0) {
-
+$negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 2, '.' , '' ) ); $intPart=$parts[0]; $decPart=$parts[1]; $lastThree=substr($intPart, -3); $other=substr($intPart, 0, -3); if ($other !=='' ) { $other=preg_replace( '/\B(?=(\d{2})+(?!\d))/' , ',' , $other ); $lastThree=',' . $lastThree; } $formatted=($negative ? '-' : '' ) . $other . $lastThree; if ((float) $decPart> 0) {
     $formatted .= '.' . $decPart;
     }
 
@@ -29,11 +27,9 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     */
 
     if (!function_exists('publicAssetPath')) {
-
     function publicAssetPath($relative)
     {
     if (function_exists('public_path')) {
-
     return public_path($relative);
     }
 
@@ -51,11 +47,9 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     */
 
     if (!function_exists('imageToDataUri')) {
-
     function imageToDataUri($path)
     {
     if (!is_file($path)) {
-
     return '';
     }
 
@@ -70,8 +64,7 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     file_get_contents($path)
     );
 
-    return
-    "data:image/{$type};base64,{$data}";
+    return "data:image/{$type};base64,{$data}";
     }
     }
 
@@ -83,17 +76,14 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     */
 
     if (!function_exists('faintPngDataUri')) {
-
     function faintPngDataUri(
     $path,
     $alphaBoost = 100
     ) {
-
     if (
     !is_file($path) ||
     !function_exists('imagecreatefrompng')
     ) {
-
     return imageToDataUri($path);
     }
 
@@ -101,7 +91,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     @imagecreatefrompng($path);
 
     if (!$src) {
-
     return imageToDataUri($path);
     }
 
@@ -153,7 +142,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     )
     );
 
-
     $watermarkSrc =
     faintPngDataUri(
     publicAssetPath(
@@ -167,31 +155,16 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     |--------------------------------------------------------------------------
     | Main Data
     |--------------------------------------------------------------------------
-    |
-    | Your $data is now:
-    |
-    | [
-    | 'user' => [...],
-    | 'invoice' => [...],
-    | 'invoice_details' => [
-    | 'subscription' => [...]
-    | ]
-    | ]
-    |
-    |--------------------------------------------------------------------------
     */
 
     $user =
     $data['user'] ?? [];
 
-
     $invoice =
     $data['invoice'] ?? [];
 
-
     $invoiceDetails =
     $data['invoice_details'] ?? [];
-
 
     $subscription =
     $invoiceDetails['subscription'] ?? [];
@@ -206,14 +179,11 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     $userId =
     $user['id'] ?? '';
 
-
     $custName =
     $user['name'] ?? '';
 
-
     $custMobile =
     $user['mobile'] ?? '';
-
 
     $custEmail =
     $user['email'] ?? '';
@@ -228,38 +198,30 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     $invoiceId =
     $invoice['id'] ?? '';
 
-
     $invoiceNo =
     $invoice['invoice_no'] ?? '';
-
 
     $orderId =
     $invoice['order_id'] ?? '';
 
-
     $invoiceUserId =
     $invoice['user_id'] ?? '';
 
-
     $invoiceDate =
     $invoice['created_at'] ?? '';
-
 
     $discount =
     (float) (
     $invoice['discount'] ?? 0
     );
 
-
     $discountType =
     $invoice['discount_type'] ?? '';
-
 
     $subTotal =
     (float) (
     $invoice['sub_total'] ?? 0
     );
-
 
     $tax =
     (float) (
@@ -276,27 +238,22 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     $subscriptionId =
     $subscription['id'] ?? '';
 
-
     $subscriptionPlanId =
     $subscription['subscription_id'] ?? '';
 
-
     $planName =
     $subscription['plan_name'] ?? '';
+
     $duration =
     $subscription['duration'] ?? '';
+
     $validity =
     $subscription['validity'] ?? '';
-
 
     $subscriptionAmount =
     (float) (
     $subscription['amount'] ?? 0
     );
-
-
-    $validity =
-    $subscription['validity'] ?? '';
 
 
     /*
@@ -306,7 +263,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     */
 
     $discountAmount = 0;
-
 
     if ($discountType === 'Percentage') {
 
@@ -341,10 +297,8 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
     $sgstRate = 9;
 
-
     $cgst =
     ($taxableAmount * $cgstRate) / 100;
-
 
     $sgst =
     ($taxableAmount * $sgstRate) / 100;
@@ -353,11 +307,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     /*
     |--------------------------------------------------------------------------
     | Grand Total
-    |--------------------------------------------------------------------------
-    |
-    | Your database already provides grand_total.
-    | Use that value instead of calculating again.
-    |
     |--------------------------------------------------------------------------
     */
 
@@ -373,33 +322,25 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
     |--------------------------------------------------------------------------
     */
 
-    $items = [
+    $descriptionParts = array_filter([
+    $planName,
+    $duration,
+    $validity
+    ]);
 
-    [
-    'description' => $planName . ' - ' . $duration . $validity,
-
-    'qty' =>
-    1,
-
-    'amount' =>
-    $subscriptionAmount
-    ]
-
-    ];
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filler Height
-    |--------------------------------------------------------------------------
-    */
-
-    $fillerHeight =
-    max(
-    250 -
-    ((count($items) - 1) * 34),
-    20
+    $description =
+    implode(
+    ' - ',
+    $descriptionParts
     );
+
+    $items = [
+    [
+    'description' => $description,
+    'qty' => 1,
+    'amount' => $subscriptionAmount
+    ]
+    ];
 
     @endphp
 
@@ -416,60 +357,40 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
             Smart Trade — Invoice
         </title>
 
-
         <style>
             @page {
-
-                margin:
-                    35px 26px;
+                margin: 35px 26px;
             }
-
 
             * {
-
-                box-sizing:
-                    border-box;
+                box-sizing: border-box;
             }
-
 
             html,
             body {
-
-                margin:
-                    0 auto !important;
-
-                padding:
-                    0;
+                margin: 0 auto !important;
+                padding: 0;
 
                 font-family:
                     "DejaVu Sans",
                     sans-serif;
 
-                color:
-                    #1a1a1a;
+                color: #1a1a1a;
 
-                font-size:
-                    12px;
+                font-size: 12px;
 
-                background-color:
-                    #eef1f6;
+                background-color: #eef1f6;
             }
-
 
             .container {
-
-                margin-top:
-                    2%;
+                margin-top: 2%;
             }
-
 
             .invoice-wrap {
 
-                width:
-                    640px;
+                width: 640px;
 
-                margin:
-                    0 auto;
+                margin: 0 auto;
 
                 padding:
                     26px 32px 30px 32px;
@@ -486,11 +407,9 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
            HEADER
         ========================================================= */
 
-
             .header-table {
 
-                width:
-                    100%;
+                width: 100%;
 
                 border-collapse:
                     collapse;
@@ -499,32 +418,23 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     22px;
             }
 
-
             .header-table td {
-
-                vertical-align:
-                    middle;
+                vertical-align: middle;
             }
-
 
             .header-table .logo-cell img {
 
-                width:
-                    210px;
+                width: 210px;
             }
-
 
             .header-table .tag-cell {
 
-                text-align:
-                    right;
+                text-align: right;
             }
-
 
             .invoice-tag {
 
-                display:
-                    inline-block;
+                display: inline-block;
 
                 background:
                     #2f4f8f;
@@ -550,11 +460,9 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
            BILL TO
         ========================================================= */
 
-
             .meta-table {
 
-                width:
-                    100%;
+                width: 100%;
 
                 border-collapse:
                     collapse;
@@ -562,7 +470,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 margin-bottom:
                     20px;
             }
-
 
             .meta-table td {
 
@@ -572,7 +479,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 padding:
                     0;
             }
-
 
             .bill-to h2 {
 
@@ -586,7 +492,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     #1a1a1a;
             }
 
-
             .bill-to .field {
 
                 font-size:
@@ -599,7 +504,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     1.4;
             }
 
-
             .bill-to .field .label {
 
                 font-weight:
@@ -608,7 +512,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 color:
                     #1a1a1a;
             }
-
 
             .bill-to .field .value {
 
@@ -624,7 +527,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
            INVOICE INFORMATION
         ========================================================= */
 
-
             .invoice-info {
 
                 text-align:
@@ -633,7 +535,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 font-size:
                     11px;
             }
-
 
             .invoice-info .row {
 
@@ -644,7 +545,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     1.4;
             }
 
-
             .invoice-info .row .label {
 
                 font-weight:
@@ -653,7 +553,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 color:
                     #1a1a1a;
             }
-
 
             .invoice-info .row .value {
 
@@ -672,13 +571,11 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
            TABLE
         ========================================================= */
 
-
             .table-frame {
 
                 position:
                     relative;
             }
-
 
             .invoice-table {
 
@@ -700,7 +597,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 z-index:
                     1;
             }
-
 
             .invoice-table th {
 
@@ -735,7 +631,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     none;
             }
 
-
             .invoice-table td {
 
                 border-left:
@@ -761,6 +656,8 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
             }
 
 
+            /* COLUMN WIDTHS */
+
             .invoice-table th:nth-child(1),
             .invoice-table td:nth-child(1) {
 
@@ -771,14 +668,12 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     center;
             }
 
-
             .invoice-table th:nth-child(2),
             .invoice-table td:nth-child(2) {
 
                 width:
                     56%;
             }
-
 
             .invoice-table th:nth-child(3),
             .invoice-table td:nth-child(3) {
@@ -790,7 +685,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     center;
             }
 
-
             .invoice-table th:nth-child(4),
             .invoice-table td:nth-child(4) {
 
@@ -801,6 +695,19 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     right;
             }
 
+
+            /* =========================================================
+           ITEM ROW
+        ========================================================= */
+
+            .item-row td {
+
+                height:
+                    45px;
+
+                vertical-align:
+                    top;
+            }
 
             .sl-cell {
 
@@ -820,17 +727,20 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     8px;
             }
 
-
             .desc-cell {
 
                 text-align:
                     left;
-                font-weight:
-                    bold;
+
                 line-height:
                     1.5;
-            }
 
+                word-wrap:
+                    break-word;
+
+                overflow-wrap:
+                    break-word;
+            }
 
             .top-value {
 
@@ -840,7 +750,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                 padding-top:
                     12px;
             }
-
 
             .top-value.qty-accent {
 
@@ -858,22 +767,20 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
             }
 
 
-            .filler-row td {
+            /* =========================================================
+           FIXED EMPTY SPACE
+        ========================================================= */
 
-                height: {
-                        {
-                        $fillerHeight
-                    }
-                }
+            .space-row td {
 
-                px;
+                height:
+                    250px;
             }
 
 
             /* =========================================================
            TAX
         ========================================================= */
-
 
             .tax-line {
 
@@ -893,6 +800,10 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                     #33415c;
             }
 
+
+            /* =========================================================
+           GRAND TOTAL
+        ========================================================= */
 
             .grand-line {
 
@@ -926,7 +837,6 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
            WATERMARK
         ========================================================= */
 
-
             .watermark {
 
                 position:
@@ -952,25 +862,20 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
     <body>
 
-
         <div class="container">
-
 
             <div class="invoice-wrap">
 
 
-                <!-- =====================================================
-             HEADER
-        ====================================================== -->
-
+                <!-- =========================================================
+     HEADER
+========================================================= -->
 
                 <table class="header-table">
 
                     <tr>
 
-
                         <td class="logo-cell">
-
 
                             @if($logoSrc)
 
@@ -979,14 +884,13 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                             @else
 
                             <strong style="
-                                font-size:20px;
-                                color:#2f4f8f;
-                            ">
+        font-size:20px;
+        color:#2f4f8f;
+    ">
                                 SMART TRADE
                             </strong>
 
                             @endif
-
 
                         </td>
 
@@ -1001,48 +905,36 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                         </td>
 
-
                     </tr>
 
                 </table>
 
 
-
-                <!-- =====================================================
-             CUSTOMER
-        ====================================================== -->
-
+                <!-- =========================================================
+     CUSTOMER
+========================================================= -->
 
                 <table class="meta-table">
 
                     <tr>
 
-
                         <td style="width:55%;">
-
 
                             <div class="bill-to">
 
-
                                 <h2>
-
                                     Bill To
-
                                 </h2>
 
 
                                 <div class="field">
 
                                     <span class="label">
-
                                         Name:
-
                                     </span>
 
                                     <span class="value">
-
                                         {{ $custName }}
-
                                     </span>
 
                                 </div>
@@ -1051,15 +943,11 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                                 <div class="field">
 
                                     <span class="label">
-
                                         Mobile No:
-
                                     </span>
 
                                     <span class="value">
-
                                         {{ $custMobile }}
-
                                     </span>
 
                                 </div>
@@ -1068,44 +956,32 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                                 <div class="field">
 
                                     <span class="label">
-
                                         Email:
-
                                     </span>
 
                                     <span class="value">
-
                                         {{ $custEmail }}
-
                                     </span>
 
                                 </div>
-
 
                             </div>
-
 
                         </td>
 
 
                         <td style="width:45%;">
 
-
                             <div class="invoice-info">
 
-
                                 <div class="row">
 
                                     <span class="label">
-
                                         Invoice No:
-
                                     </span>
 
                                     <span class="value">
-
                                         {{ $invoiceNo }}
-
                                     </span>
 
                                 </div>
@@ -1114,39 +990,29 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                                 <div class="row">
 
                                     <span class="label">
-
                                         Invoice Date:
-
                                     </span>
 
                                     <span class="value">
-
                                         {{ $invoiceDate }}
-
                                     </span>
 
                                 </div>
-
 
                             </div>
 
-
                         </td>
-
 
                     </tr>
 
                 </table>
 
 
-
-                <!-- =====================================================
-             INVOICE TABLE
-        ====================================================== -->
-
+                <!-- =========================================================
+     INVOICE TABLE
+========================================================= -->
 
                 <div class="table-frame">
-
 
                     @if($watermarkSrc)
 
@@ -1199,15 +1065,13 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                         <tbody>
 
 
-                            <!-- =================================================
-                         ITEMS
-                    ================================================== -->
-
+                            <!-- =====================================================
+     ITEM
+====================================================== -->
 
                             @foreach($items as $index => $item)
 
-                            <tr>
-
+                            <tr class="item-row">
 
                                 <td class="sl-cell">
 
@@ -1232,25 +1096,20 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 <td class="top-value">
 
-                                    {{ formatINR(
-                                    $item['amount'] ?? 0
-                                ) }}
+                                    {{ formatINR($item['amount'] ?? 0) }}
 
                                 </td>
-
 
                             </tr>
 
                             @endforeach
 
 
+                            <!-- =====================================================
+     EMPTY SPACE
+====================================================== -->
 
-                            <!-- =================================================
-                         FILLER
-                    ================================================== -->
-
-
-                            <tr class="filler-row">
+                            <tr class="space-row">
 
                                 <td></td>
 
@@ -1263,19 +1122,15 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
                             </tr>
 
 
-
-                            <!-- =================================================
-                         SUBTOTAL
-                    ================================================== -->
-
+                            <!-- =====================================================
+     SUBTOTAL
+====================================================== -->
 
                             <tr>
 
-
                                 <td></td>
 
                                 <td></td>
-
 
                                 <td class="tax-line">
 
@@ -1283,41 +1138,30 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 </td>
 
-
                                 <td class="tax-line">
 
-                                    {{ formatINR(
-                                $subTotal
-                            ) }}
+                                    {{ formatINR($subTotal) }}
 
                                 </td>
-
 
                             </tr>
 
 
-
-                            <!-- =================================================
-                         DISCOUNT
-                    ================================================== -->
-
+                            <!-- =====================================================
+     DISCOUNT
+====================================================== -->
 
                             <tr>
 
-
                                 <td></td>
 
                                 <td></td>
-
 
                                 <td class="tax-line">
 
                                     Discount
 
-                                    @if(
-                                    $discountType ===
-                                    'Percentage'
-                                    )
+                                    @if($discountType === 'Percentage')
 
                                     ({{ $discount }}%)
 
@@ -1329,32 +1173,24 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 </td>
 
-
                                 <td class="tax-line">
 
-                                    - {{ formatINR(
-                                $discountAmount
-                            ) }}
+                                    - {{ formatINR($discountAmount) }}
 
                                 </td>
-
 
                             </tr>
 
 
-
-                            <!-- =================================================
-                         CGST
-                    ================================================== -->
-
+                            <!-- =====================================================
+     CGST
+====================================================== -->
 
                             <tr>
 
-
                                 <td></td>
 
                                 <td></td>
-
 
                                 <td class="tax-line">
 
@@ -1363,32 +1199,24 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 </td>
 
-
                                 <td class="tax-line">
 
-                                    {{ formatINR(
-                                $cgst
-                            ) }}
+                                    {{ formatINR($cgst) }}
 
                                 </td>
-
 
                             </tr>
 
 
-
-                            <!-- =================================================
-                         SGST
-                    ================================================== -->
-
+                            <!-- =====================================================
+     SGST
+====================================================== -->
 
                             <tr>
 
-
                                 <td></td>
 
                                 <td></td>
-
 
                                 <td class="tax-line">
 
@@ -1397,32 +1225,24 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 </td>
 
-
                                 <td class="tax-line">
 
-                                    {{ formatINR(
-                                $sgst
-                            ) }}
+                                    {{ formatINR($sgst) }}
 
                                 </td>
-
 
                             </tr>
 
 
-
-                            <!-- =================================================
-                         GRAND TOTAL
-                    ================================================== -->
-
+                            <!-- =====================================================
+     GRAND TOTAL
+====================================================== -->
 
                             <tr>
 
-
                                 <td></td>
 
                                 <td></td>
-
 
                                 <td class="grand-line">
 
@@ -1430,33 +1250,25 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
                                 </td>
 
-
                                 <td class="grand-line">
 
-                                    {{ formatINR(
-                                $grandTotal
-                            ) }}
+                                    {{ formatINR($grandTotal) }}
 
                                 </td>
-
 
                             </tr>
 
 
                         </tbody>
 
-
                     </table>
-
 
                 </div>
 
 
             </div>
 
-
         </div>
-
 
     </body>
 

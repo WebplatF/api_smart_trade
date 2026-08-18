@@ -227,4 +227,26 @@ class SubscriptionController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userDetails(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'user_id' => 'required|strict_string',
+                'sub_id' => 'required|strict_int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $userId = $request->get('user_id');
+            $subId = $request->get('sub_id');
+            $returnResponse = $this->subscriptionService->userDetailsSubscription(userId: $userId, subId: $subId);
+            return ResponseHelper::successResponse(data: $returnResponse, message: "User Details");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
 }

@@ -235,7 +235,7 @@ class SubscriptionController extends Controller
     {
         try {
             $Validator = Validator::make($request->all(), [
-                'user_id' => 'required|strict_string',
+                'user_id' => 'required|strict_int',
                 'sub_id' => 'required|strict_int',
             ]);
             if ($Validator->fails()) {

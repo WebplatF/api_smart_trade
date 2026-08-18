@@ -21,6 +21,7 @@ use Dompdf\Dompdf;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SubscriptionService
@@ -268,6 +269,11 @@ class SubscriptionService
                     "renew_date" => $endDate->toDateString(),
                     "end_date" => $endDate->toDateString()
                 ]);
+                try {
+                    $this->getInvoice(userId: $user->user_id, subId: $user->id);
+                } catch (Exception $e) {
+                    Log::info("Email sending error", $e);
+                }
             } else {
                 $user->update([
                     "status" => $action
@@ -329,40 +335,44 @@ class SubscriptionService
     }
     public function getInvoice(int $userId, int $subId)
     {
-        $invoiceDetails = $this->userDetailsSubscription(
-            userId: $userId,
-            subId: $subId
-        );
-        $html = view('invoice', [
-            'data' => $invoiceDetails
-        ])->render();
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-        $pdf = $dompdf->output();
-        $fileName =
-            ($invoiceDetails['invoice']['invoice_no'] ?? 'invoice')
-            . '.pdf';
-        $email =  $invoiceDetails['user']['email'];
-        Mail::raw(
-            'Please find the attached invoice for your Smart Trade subscription purchase.',
-            function ($message) use ($pdf, $fileName, $email) {
-                $message->to($email)
-                    ->subject(
-                        'Invoice for Your Smart Trade Subscription Purchase'
-                    )
-                    ->attachData(
-                        $pdf,
-                        $fileName,
-                        [
-                            'mime' => 'application/pdf',
-                        ]
-                    );
-            }
-        );
-        return response($html)
-            ->header('Content-Type', 'text/html');
+        try {
+            $invoiceDetails = $this->userDetailsSubscription(
+                userId: $userId,
+                subId: $subId
+            );
+            $html = view('invoice', [
+                'data' => $invoiceDetails
+            ])->render();
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $pdf = $dompdf->output();
+            $fileName =
+                ($invoiceDetails['invoice']['invoice_no'] ?? 'invoice')
+                . '.pdf';
+            $email =  $invoiceDetails['user']['email'];
+            Mail::raw(
+                'Please find the attached invoice for your Smart Trade subscription purchase.',
+                function ($message) use ($pdf, $fileName, $email) {
+                    $message->to($email)
+                        ->subject(
+                            'Invoice for Your Smart Trade Subscription Purchase'
+                        )
+                        ->attachData(
+                            $pdf,
+                            $fileName,
+                            [
+                                'mime' => 'application/pdf',
+                            ]
+                        );
+                }
+            );
+            return response($html)
+                ->header('Content-Type', 'text/html');
+        } catch (Exception $e) {
+            Log::info("Email error", $e);
+        }
     }
     public function userDetailsSubscription(int $userId, int $subId)
     {

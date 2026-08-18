@@ -181,7 +181,7 @@ class PaymentService
                         $invoice->update([
                             'order_id' => $orderId
                         ]);
-                        $details = InvoiceDetails::with('userSubscription')->where('is_delete', 0)->get();
+                        $details = InvoiceDetails::with('userSubscription')->where('is_delete', 0)->where('invoice_id', $subscription['invoice_id'])->get();
                         $subTotal = 0;
                         foreach ($details as $detail) {
                             if ($detail->userSubscription) {

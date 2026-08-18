@@ -10,6 +10,9 @@ use App\Models\InvoiceSequence;
 use App\Models\SubscriptionMaster;
 use App\Models\UserMaster;
 use App\Models\UserSubscription;
+use App\Resources\InvoiceDetailsResources;
+use App\Resources\InvoiceMasterResources;
+use App\Resources\InvoiceUserResources;
 use App\Resources\SubscriptionResources;
 use App\Resources\UserSubscriptionResources;
 use App\ResponseModel\UserSubscriptionListResponseModel;
@@ -352,10 +355,13 @@ class SubscriptionService
             $user = UserMaster::where('is_delete', 0)->find($userId);
             $invoiceDetails = InvoiceDetails::with('userSubscription')->where('is_delete', 0)->where('user_sub_id', $subId)->first();
             $invoice = InvoiceMaster::where('is_delete', 0)->find($invoiceDetails->invoice_id);
+            $invoiceUser = InvoiceUserResources::make($user)->resolve();
+            $invoiceMaster = InvoiceMasterResources::make($invoice)->resolve();
+            $invoiceDet = InvoiceDetailsResources::make($invoiceDetails)->resolve();
             return [
-                "user" => $user,
-                "invoice" => $invoice,
-                "invoice_details" => $invoiceDetails
+                "user" => $invoiceUser,
+                "invoice" => $invoiceMaster,
+                "invoice_details" => $invoiceDet
             ];
         } catch (QueryException $e) {
         } catch (Exception $e) {

@@ -14,7 +14,8 @@ class UserMaster extends Model
         'mobile',
         'password',
         'last_login',
-        'login_ip'
+        'login_ip',
+        'is_delete'
     ];
 
     protected $casts = [

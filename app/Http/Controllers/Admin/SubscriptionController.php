@@ -271,4 +271,31 @@ class SubscriptionController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+
+    /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function manualSubscription(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'plan_id' => 'required|strict_int',
+                'user_list' => 'required|array_of_ints',
+                'tag' => 'required|strict_string',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $planId = $request->get('plan_id');
+            $userList = $request->input('user_list');
+            $tag = $request->input('tag');
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $this->subscriptionService->manualUserSubscription(planId: $planId, userList: $userList, tag: $tag, startDate: $startDate, endDate: $endDate);
+            return ResponseHelper::successResponse(message: "Mannual subscription is added to selected users successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
 }

@@ -327,20 +327,24 @@ class SubscriptionService
         $sequence = InvoiceSequence::create();
         return 'SMTA-IN-' . str_pad($sequence->id, 3, '0', STR_PAD_LEFT);
     }
-    public function getInvoice()
+    public function getInvoice(int $userId, int $subId)
     {
-        $html = view('invoice')->render();
+        $invoiceDetails = $this->userDetailsSubscription(userId: $userId, subId: $subId);
+        $html = view('invoice', [
+            'data' => $invoiceDetails
+        ])->render();
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
         $pdf = $dompdf->output();
-        Mail::raw("Please find inovice", function ($message) use ($pdf) {
+        $fileName = $invoiceDetails->invoice->invoice_no . '.pdf';
+        Mail::raw("Please find inovice", function ($message) use ($pdf, $fileName) {
             $message->to('mukiloffice@gmail.com')
                 ->subject('Invoice for Your Smart Trade Subscription Purchase')
                 ->attachData(
                     $pdf,
-                    'invoice.pdf',
+                    $fileName,
                     [
                         'mime' => 'application/pdf',
                     ]
@@ -349,7 +353,7 @@ class SubscriptionService
         return response($html)
             ->header('Content-Type', 'text/html');
     }
-    public function userDetailsSubscription(int $userId, int $subId)
+    public function userDetailsSubscription(int $userId, int $subId): object
     {
         try {
             $user = UserMaster::where('is_delete', 0)->find($userId);
@@ -358,13 +362,15 @@ class SubscriptionService
             $invoiceUser = InvoiceUserResources::make($user)->resolve();
             $invoiceMaster = InvoiceMasterResources::make($invoice)->resolve();
             $invoiceDet = InvoiceDetailsResources::make($invoiceDetails)->resolve();
-            return [
+            return (object)[
                 "user" => $invoiceUser,
                 "invoice" => $invoiceMaster,
                 "invoice_details" => $invoiceDet
             ];
         } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 }

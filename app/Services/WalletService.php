@@ -200,7 +200,7 @@ class WalletService
         float $amount,
         string $date,
         bool $isLog = true
-    ): object {
+    ) {
         try {
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");
@@ -251,7 +251,7 @@ class WalletService
         float $amount,
         string $date,
         bool $isLog = true
-    ): object {
+    ) {
         try {
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");

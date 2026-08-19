@@ -14,7 +14,7 @@ class SubscriptionExpiry extends Command
     {
         DB::table('UserSubscription')
             ->whereRaw(
-                "STR_TO_DATE(end_date, '%Y-%m-%d') < ?",
+                "STR_TO_DATE(end_date, '%Y-%m-%d') <= ?",
                 [Carbon::today()->format('Y-m-d')]
             )
             ->where('status', 'approved')

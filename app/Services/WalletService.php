@@ -26,7 +26,7 @@ class WalletService
                 ->where('is_delete', 0)
                 ->first();
             if (!$wallet) {
-                throw new Exception("User wallet not found");
+                return [];
             }
             $data = WalletResources::make($wallet);
             return $data->resolve();

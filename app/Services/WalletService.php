@@ -134,7 +134,7 @@ class WalletService
                 ),
                 default => throw new Exception("Invalid actions"),
             };
-            return $wallet;
+            return "";
         } catch (QueryException $e) {
             throw new Exception('Wallet action Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
@@ -228,15 +228,15 @@ class WalletService
                         description: "Amount Deposited to account",
                         createdDate: $timestamp
                     );
-                    return (object)[
-                        'id' => $history->id,
-                        'amount' => $history->amount,
-                        'balance' => $history->balance,
-                        'action' => $history->action,
-                        'description' => $history->description
-                    ];
+                    // return (object)[
+                    //     'id' => $history->id,
+                    //     'amount' => $history->amount,
+                    //     'balance' => $history->balance,
+                    //     'action' => $history->action,
+                    //     'description' => $history->description
+                    // ];
                 } else {
-                    return [];
+                    // return [];
                 }
             });
         } catch (QueryException $e) {
@@ -279,15 +279,15 @@ class WalletService
                         description: "Amount widthdraw from account",
                         createdDate: $timestamp
                     );
-                    return (object)[
-                        'id' => $history->id,
-                        'amount' => $history->amount,
-                        'balance' => $history->balance,
-                        'action' => $history->action,
-                        'description' => $history->description
-                    ];
+                    // return (object)[
+                    //     'id' => $history->id,
+                    //     'amount' => $history->amount,
+                    //     'balance' => $history->balance,
+                    //     'action' => $history->action,
+                    //     'description' => $history->description
+                    // ];
                 } else {
-                    return [];
+                    // return [];
                 }
             });
         } catch (QueryException $e) {

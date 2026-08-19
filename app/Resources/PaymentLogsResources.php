@@ -15,6 +15,7 @@ class PaymentLogsResources extends JsonResource
             'balance' => $this->balance ?? 0.0,
             'action' => $this->action ?? "",
             'description' => $this->description ?? "",
+            'direction' => $this->direction ?? "",
             'created_date' => $this->created_at->toDateString() ?? ""
         ];
     }

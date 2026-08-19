@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\CustomControllerCreation::class,
         \App\Console\Commands\WatchHistoryPartition::class,
+        \App\Console\Commands\SubscriptionExpiry::class
     ];
 
     /**

@@ -235,6 +235,8 @@ class WalletService
                         'action' => $history->action,
                         'description' => $history->description
                     ];
+                } else {
+                    return [];
                 }
             });
         } catch (QueryException $e) {
@@ -284,6 +286,8 @@ class WalletService
                         'action' => $history->action,
                         'description' => $history->description
                     ];
+                } else {
+                    return [];
                 }
             });
         } catch (QueryException $e) {

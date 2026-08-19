@@ -62,7 +62,7 @@ class TradeEntryService
                     'remark' => $tradeEntryCreateModel->remark,
                 ]);
                 $this->walletService->walleteAction(userId: $userId, action: $tradeEntryCreateModel->winLoss === 'WIN'
-                    ? "deposite" : "withdraw", amount: $tradeAmt);
+                    ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryCreateModel->date);
                 $this->walletService->PaymentLogsActions(
                     amount: $tradeAmt,
                     balance: $actualBal,
@@ -102,45 +102,51 @@ class TradeEntryService
                 $tradeAmt = $tradeEntryEditModel->winLoss === 'WIN'
                     ? $tradeEntryEditModel->profit
                     : $tradeEntryEditModel->loss;
-                $actualBal =   $tradeEntryEditModel->winLoss === 'WIN'
-                    ?  bcadd($wallet->amount, $tradeAmt, 2) : bcsub($wallet->amount, $tradeAmt, 2);
-                if (bccomp($actualBal, '0.00', 2) < 0) {
-                    throw new Exception("Insufficient wallet balance.");
+                $tradeEdit = TradeEntry::where('is_delete', 0)->find($tradeEntryEditModel->tradeId);
+                if ($tradeEdit) {
+                    $oldAmount = $tradeEdit->win_loss === 'WIN' ? $tradeEdit->profit : $tradeEdit->loss;
+                    $actualBal = $oldAmount < $tradeAmt
+                        ?  bcadd($wallet->amount, $tradeAmt, 2) : bcsub($wallet->amount, $tradeAmt, 2);
+                    if (bccomp($actualBal, '0.00', 2) < 0) {
+                        throw new Exception("Insufficient wallet balance.");
+                    }
+                    $tradeEdit->update([
+                        'wallet_id' => $tradeEntryEditModel->walletId,
+                        'date' => $tradeEntryEditModel->date,
+                        'pair' => $tradeEntryEditModel->pair,
+                        'lot_size' => $tradeEntryEditModel->lotSize,
+                        'direction' => $tradeEntryEditModel->direction,
+                        'entry_price' => $tradeEntryEditModel->entryPrice,
+                        'stop_loss' => $tradeEntryEditModel->stopLoss,
+                        'take_profit' => $tradeEntryEditModel->takeProfit,
+                        'exit_price' => $tradeEntryEditModel->exitPrice,
+                        'points_captured' => $tradeEntryEditModel->pointsCaptured,
+                        'win_loss' => $tradeEntryEditModel->winLoss,
+                        'risk_reward' => $tradeEntryEditModel->riskReward,
+                        'reason' => $tradeEntryEditModel->reason,
+                        'profit' => $tradeEntryEditModel->profit,
+                        'loss' => $tradeEntryEditModel->loss,
+                        'remark' => $tradeEntryEditModel->remark,
+                    ]);
+                    // $this->walletService->walleteAction(userId: $userId, action: $tradeEntryEditModel->winLoss === 'WIN'
+                    //     ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryEditModel->date);
+                    $this->walletService->walleteAction(userId: $userId, action: $oldAmount < $tradeAmt
+                        ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryEditModel->date);
+                    $this->walletService->PaymentLogsActions(
+                        amount: $tradeAmt,
+                        balance: $actualBal,
+                        walletId: $tradeEntryEditModel->walletId,
+                        action: "TRADE ENTRY",
+                        tradeId: $tradeEdit->id,
+                        direction: $oldAmount < $tradeAmt
+                            ? "Inward" : "Outward",
+                        description: "Amount adjusted by trade of " . $tradeEntryEditModel->date,
+                        createdDate: $tradeEntryEditModel->date
+                    );
+                    return (object)[
+                        'id' => $tradeEdit->id
+                    ];
                 }
-                $tradeEdit = TradeEntry::create([
-                    'wallet_id' => $tradeEntryEditModel->walletId,
-                    'date' => $tradeEntryEditModel->date,
-                    'pair' => $tradeEntryEditModel->pair,
-                    'lot_size' => $tradeEntryEditModel->lotSize,
-                    'direction' => $tradeEntryEditModel->direction,
-                    'entry_price' => $tradeEntryEditModel->entryPrice,
-                    'stop_loss' => $tradeEntryEditModel->stopLoss,
-                    'take_profit' => $tradeEntryEditModel->takeProfit,
-                    'exit_price' => $tradeEntryEditModel->exitPrice,
-                    'points_captured' => $tradeEntryEditModel->pointsCaptured,
-                    'win_loss' => $tradeEntryEditModel->winLoss,
-                    'risk_reward' => $tradeEntryEditModel->riskReward,
-                    'reason' => $tradeEntryEditModel->reason,
-                    'profit' => $tradeEntryEditModel->profit,
-                    'loss' => $tradeEntryEditModel->loss,
-                    'remark' => $tradeEntryEditModel->remark,
-                ]);
-                $this->walletService->walleteAction(userId: $userId, action: $tradeEntryEditModel->winLoss === 'WIN'
-                    ? "deposite" : "withdraw", amount: $tradeAmt);
-                $this->walletService->PaymentLogsActions(
-                    amount: $tradeAmt,
-                    balance: $actualBal,
-                    walletId: $tradeEntryEditModel->walletId,
-                    action: "TRADE ENTRY",
-                    tradeId: $tradeEdit->id,
-                    direction: $tradeEntryEditModel->winLoss === 'WIN'
-                        ? "Inward" : "Outward",
-                    description: "Amount adjusted by trade of " . $tradeEntryEditModel->date,
-                    createdDate: $tradeEntryEditModel->date
-                );
-                return (object)[
-                    'id' => $tradeEdit->id
-                ];
             });
         } catch (QueryException $e) {
             throw new Exception('Trade entry edit Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));

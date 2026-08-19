@@ -86,15 +86,17 @@ class WalletController extends Controller
         try {
             $userId = (int)$request->get('user_id');
             $Validator = Validator::make($request->all(), [
+                'date' => 'required|strict_string',
                 'action' => 'required|strict_string',
                 'amount' => 'required|strict_number',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
+            $date = $request->get('date');
             $action = $request->get('action');
             $amount = (float)$request->get('amount', 0.0);
-            $walletReturn = $this->walletService->walleteAction(userId: $userId, action: $action, amount: $amount);
+            $walletReturn = $this->walletService->walleteAction(userId: $userId, action: $action, amount: $amount,date:$date);
             return ResponseHelper::successResponse(data: $walletReturn, message: "user wallet created successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);

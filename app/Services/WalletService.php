@@ -111,12 +111,27 @@ class WalletService
      *
      * @return object
      */
-    public function walleteAction(int $userId, string $action, float $amount)
-    {
+    public function walleteAction(
+        int $userId,
+        string $action,
+        float $amount,
+        string $date,
+        bool $isLog = true
+    ) {
         try {
             $wallet = match ($action) {
-                'deposite' => $this->deposite(userId: $userId, amount: $amount),
-                'withdraw' => $this->widthdraw(userId: $userId, amount: $amount),
+                'deposite' => $this->deposite(
+                    userId: $userId,
+                    amount: $amount,
+                    date: $date,
+                    isLog: $isLog
+                ),
+                'withdraw' => $this->widthdraw(
+                    userId: $userId,
+                    amount: $amount,
+                    date: $date,
+                    isLog: $isLog
+                ),
                 default => throw new Exception("Invalid actions"),
             };
             return $wallet;
@@ -180,13 +195,17 @@ class WalletService
         }
     }
 
-    private function deposite(int $userId, float $amount): object
-    {
+    private function deposite(
+        int $userId,
+        float $amount,
+        string $date,
+        bool $isLog = true
+    ): object {
         try {
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");
             }
-            return DB::transaction(function () use ($userId, $amount) {
+            return DB::transaction(function () use ($userId, $amount, $isLog, $date) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
                     ->first();
@@ -197,23 +216,26 @@ class WalletService
                 $wallet->update([
                     'amount' => bcadd($wallet->amount, $amount, 2),
                 ]);
-                $history = $this->PaymentLogsActions(
-                    amount: $amount,
-                    balance: $wallet->amount,
-                    walletId: $wallet->id,
-                    action: "DEPOSIT",
-                    tradeId: 0,
-                    direction: "Inward",
-                    description: "Amount Deposited to account",
-                    createdDate: Carbon::now()->toDateString()
-                );
-                return (object)[
-                    'id' => $history->id,
-                    'amount' => $history->amount,
-                    'balance' => $history->balance,
-                    'action' => $history->action,
-                    'description' => $history->description
-                ];
+                if ($isLog) {
+                    $timestamp = Carbon::parse($date)->startOfDay();
+                    $history = $this->PaymentLogsActions(
+                        amount: $amount,
+                        balance: $wallet->amount,
+                        walletId: $wallet->id,
+                        action: "DEPOSIT",
+                        tradeId: 0,
+                        direction: "Inward",
+                        description: "Amount Deposited to account",
+                        createdDate: $timestamp
+                    );
+                    return (object)[
+                        'id' => $history->id,
+                        'amount' => $history->amount,
+                        'balance' => $history->balance,
+                        'action' => $history->action,
+                        'description' => $history->description
+                    ];
+                }
             });
         } catch (QueryException $e) {
             throw new Exception('Wallet deposite Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
@@ -222,13 +244,17 @@ class WalletService
         }
     }
 
-    private function widthdraw(int $userId, float $amount): object
-    {
+    private function widthdraw(
+        int $userId,
+        float $amount,
+        string $date,
+        bool $isLog = true
+    ): object {
         try {
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");
             }
-            return DB::transaction(function () use ($userId, $amount) {
+            return DB::transaction(function () use ($userId, $amount, $isLog, $date) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
                     ->first();
@@ -239,23 +265,26 @@ class WalletService
                 $wallet->update([
                     'amount' => bcsub($wallet->amount, $amount, 2),
                 ]);
-                $history = $this->PaymentLogsActions(
-                    amount: $amount,
-                    balance: $wallet->amount,
-                    walletId: $wallet->id,
-                    action: "WITHDRAW",
-                    tradeId: 0,
-                    direction: "Outward",
-                    description: "Amount widthdraw from account",
-                    createdDate: Carbon::now()->toDateString()
-                );
-                return (object)[
-                    'id' => $history->id,
-                    'amount' => $history->amount,
-                    'balance' => $history->balance,
-                    'action' => $history->action,
-                    'description' => $history->description
-                ];
+                if ($isLog) {
+                    $timestamp = Carbon::parse($date)->startOfDay();
+                    $history = $this->PaymentLogsActions(
+                        amount: $amount,
+                        balance: $wallet->amount,
+                        walletId: $wallet->id,
+                        action: "WITHDRAW",
+                        tradeId: 0,
+                        direction: "Outward",
+                        description: "Amount widthdraw from account",
+                        createdDate: $timestamp
+                    );
+                    return (object)[
+                        'id' => $history->id,
+                        'amount' => $history->amount,
+                        'balance' => $history->balance,
+                        'action' => $history->action,
+                        'description' => $history->description
+                    ];
+                }
             });
         } catch (QueryException $e) {
             throw new Exception(($e->errorInfo[2] ?? $e->getMessage()));

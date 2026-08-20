@@ -134,10 +134,11 @@ class SubscriptionService
         int $planId,
         int $imageId,
         int $userId,
-        string $code = ''
+        string $code = '',
+        bool $isRenew = false,
     ) {
         try {
-            return  DB::transaction(function () use ($planId, $imageId, $userId, $code) {
+            return  DB::transaction(function () use ($planId, $imageId, $userId, $code, $isRenew) {
                 $now = Carbon::now();
                 $subscription = SubscriptionMaster::findOrFail($planId);
                 if (!$subscription) {
@@ -149,6 +150,10 @@ class SubscriptionService
                     ->where('end_date', '>=', $now)
                     ->first();
                 if ($runningSubscription) {
+                    if ($isRenew) {
+                        $renewable = $this->renewalSubscription(planId: $planId, imageId: $imageId, userId: $userId, code: $code,);
+                        return $renewable;
+                    }
                     throw new Exception('Already some plan subscription is going');
                 }
                 $subscriptions = UserSubscription::where('user_id', $userId)
@@ -204,6 +209,63 @@ class SubscriptionService
             throw new Exception('Subscription  Failed :' . $e->errorInfo[2] ?? $e->getMessage());
         } catch (Exception $e) {
             throw new Exception("Subscription  Failed :" . $e->getMessage());
+        }
+    }
+    public function renewalSubscription(int $planId, int $imageId, int $userId, string $code)
+    {
+        try {
+            $subscriptions = UserSubscription::where('user_id', $userId)
+                ->where('subscription_id', $planId)
+                ->where('is_delete', 0)
+                ->first();
+            if ($subscriptions) {
+                if ($subscriptions->status == 'pending') {
+                    $invoiceDetails = InvoiceDetails::where('is_delete', 0)->where('user_sub_id', $subscriptions->id)->first();
+                    // throw new Exception('Already this subscription waiting for admin approval');
+                    return  [
+                        "id" => $subscriptions->id,
+                        "status" => $subscriptions->status ?? "pending",
+                        "invoice_id" => $invoiceDetails->invoice_id
+                    ];
+                }
+                if ($subscriptions->status == 'approved') {
+                    throw new Exception('Already subscription is available renewable from admin');
+                }
+                if ($subscriptions->status == 'rejected') {
+                    $invoiceDetails = InvoiceDetails::where('is_delete', 0)->where('user_sub_id', $subscriptions->id)->first();
+                    $subscriptions->update([
+                        'status' => 'pending',
+                        'imageid' => $imageId
+                    ]);
+                    return  [
+                        "id" => $subscriptions->id,
+                        "status" => $subscriptions->status ?? "pending",
+                        "invoice_id" => $invoiceDetails->invoice_id
+                    ];
+                }
+            } else {
+                $userSubscription = UserSubscription::create(
+                    [
+                        'user_id' => $userId,
+                        'subscription_id' => $planId,
+                        'image_id' => $imageId,
+                        'plan_name' => $subscription->plan_name ?? "",
+                        'amount' => $subscription->amount ?? "",
+                        'duration' => $subscription->duration ?? "",
+                        'coupon' => $code ?? "",
+                    ]
+                );
+                $inovice = $this->invoiceCreate(userId: $userId, code: $code, userSubId: $userSubscription->id);
+                return [
+                    "id" => $userSubscription->id,
+                    "status" => $userSubscription->status ?? "pending",
+                    "invoice_id" => $inovice->invoice_id
+                ];
+            }
+        } catch (QueryException $e) {
+            return DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception("Renewal subscription failed :" . $e->getMessage());
         }
     }
     /**

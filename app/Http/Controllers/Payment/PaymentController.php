@@ -39,7 +39,15 @@ class PaymentController extends Controller
             $planId = (int)$request->get('plan_id');
             $code = $request->get('code' ?? "");
             $tag = $request->get('tag');
-            $response = $this->paymentService->orderCreate(code: $code, amount: $amount, userId: $userId, tag: $tag, planId: $planId);
+            $isRnew = $request->get('is_renew') ?? false;
+            $response = $this->paymentService->orderCreate(
+                code: $code,
+                amount: $amount,
+                userId: $userId,
+                tag: $tag,
+                planId: $planId,
+                isRenew: $isRnew
+            );
             return ResponseHelper::successResponse(data: $response->toArray(), message: "Order is created", code: 200);
         } catch (Throwable $e) {
             Log::error($e->getMessage());

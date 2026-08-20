@@ -104,9 +104,26 @@ class TradeEntryService
                     : $tradeEntryEditModel->loss;
                 $tradeEdit = TradeEntry::where('is_delete', 0)->find($tradeEntryEditModel->tradeId);
                 if ($tradeEdit) {
+                    $action = '';
+                    $oldDate = $tradeEdit->date;
                     $oldAmount = $tradeEdit->win_loss === 'WIN' ? $tradeEdit->profit : $tradeEdit->loss;
-                    $actualBal = $oldAmount < $tradeAmt
-                        ?  bcadd($wallet->amount, $tradeAmt, 2) : bcsub($wallet->amount, $tradeAmt, 2);
+                    if ($tradeEdit->win_loss === $tradeEntryEditModel->winLoss) {
+                        if ($tradeEdit->win_loss == "WIN") {
+                            $actualBal = $wallet->amount - $oldAmount + $tradeAmt;
+                            $action = 'deposite';
+                        } else {
+                            $actualBal = $wallet->amount + $oldAmount - $tradeAmt;
+                            $action = 'withdraw';
+                        }
+                    } else {
+                        if ($tradeEdit->win_loss === 'WIN' && $tradeEntryEditModel->winLoss === 'LOSS') {
+                            $actualBal = $wallet->amount - $oldAmount - $tradeAmt;
+                            $action = 'withdraw';
+                        } else {
+                            $actualBal = $wallet->amount + $oldAmount + $tradeAmt;
+                            $action = 'deposite';
+                        }
+                    }
                     if (bccomp($actualBal, '0.00', 2) < 0) {
                         throw new Exception("Insufficient wallet balance.");
                     }
@@ -128,10 +145,13 @@ class TradeEntryService
                         'loss' => $tradeEntryEditModel->loss,
                         'remark' => $tradeEntryEditModel->remark,
                     ]);
-                    // $this->walletService->walleteAction(userId: $userId, action: $tradeEntryEditModel->winLoss === 'WIN'
-                    //     ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryEditModel->date);
-                    $this->walletService->walleteAction(userId: $userId, action: $oldAmount < $tradeAmt
-                        ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryEditModel->date);
+                    $this->walletService->walleteAction(
+                        userId: $userId,
+                        action: $action,
+                        amount: $tradeAmt,
+                        isLog: false,
+                        date: $tradeEntryEditModel->date
+                    );
                     $this->walletService->PaymentLogsActions(
                         amount: $tradeAmt,
                         balance: $actualBal,
@@ -140,7 +160,7 @@ class TradeEntryService
                         tradeId: $tradeEdit->id,
                         direction: $oldAmount < $tradeAmt
                             ? "Inward" : "Outward",
-                        description: "Amount adjusted by trade of " . $tradeEntryEditModel->date,
+                        description: "Amount adjusted by trade of " . $oldDate,
                         createdDate: $tradeEntryEditModel->date
                     );
                     return (object)[

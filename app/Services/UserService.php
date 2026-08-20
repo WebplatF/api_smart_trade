@@ -226,7 +226,7 @@ class UserService
             $users = UserMaster::whereDoesntHave('subscriptions', function ($query) use ($now) {
                 $query->where('status', 'approved')
                     ->where('is_delete', 0)
-                    ->where('end_date', '>', $now->DateToString());
+                    ->where('end_date', '>', $now->toDateString());
             })
                 ->where('is_delete', 0)
                 ->paginate(20);

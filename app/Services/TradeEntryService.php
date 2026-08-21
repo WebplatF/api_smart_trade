@@ -149,13 +149,17 @@ class TradeEntryService
                         'loss' => $tradeEntryEditModel->loss,
                         'remark' => $tradeEntryEditModel->remark,
                     ]);
-                    $this->walletService->walleteAction(
-                        userId: $userId,
-                        action: $action,
-                        amount: $walletReduce,
-                        isLog: false,
-                        date: $tradeEntryEditModel->date
-                    );
+                    $wallet->lockForUpdate();
+                    $wallet->update([
+                        'amount' => $actualBal,
+                    ]);
+                    // $this->walletService->walleteAction(
+                    //     userId: $userId,
+                    //     action: $action,
+                    //     amount: $walletReduce,
+                    //     isLog: false,
+                    //     date: $tradeEntryEditModel->date
+                    // );
                     $this->walletService->PaymentLogsActions(
                         amount: $tradeAmt,
                         balance: $actualBal,

@@ -348,6 +348,24 @@ class SubscriptionService
             throw new Exception("Subscription List Failed :" . $e->getMessage());
         }
     }
+    public function deactivateSubscription(int $subId)
+    {
+        try {
+            DB::transaction(function () use ($subId) {
+                $subscription = UserSubscription::where('is_delete', 0)->find($subId);
+                if (!$subscription) {
+                    throw new Exception("Invalid subscription");
+                }
+                $subscription->update([
+                    'is_delete' => 1
+                ]);
+            });
+        } catch (QueryException $e) {
+            return DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            return new Exception($e->getMessage());
+        }
+    }
 
     public function invoiceCreate(int $userId, string $code, int $userSubId): object
     {

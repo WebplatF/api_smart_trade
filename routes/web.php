@@ -83,6 +83,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/update_status', 'Admin\SubscriptionController@subScriptionStatusUpdate');
             $router->get('/list', 'Admin\SubscriptionController@userSubscriptionList');
             $router->post('/action', 'Admin\SubscriptionController@subscriptionAction');
+            $router->delete('/delete/{id}', 'Admin\SubscriptionController@deactivateSubscription');
         });
         $router->group(['prefix' => 'course'], function () use ($router) {
             $router->get('/list', 'Admin\CourseController@courseList');

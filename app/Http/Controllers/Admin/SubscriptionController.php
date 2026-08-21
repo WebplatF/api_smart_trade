@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
+use Exception;
 use Throwable;
 
 
@@ -152,6 +153,20 @@ class SubscriptionController extends Controller
             return ResponseHelper::successResponse(
                 data: $retunResponse,
                 message: "Subscription Data Arrived Successfully..!"
+            );
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    public function deactivateSubscription(Request $request, int $id)
+    {
+        try {
+            if (!$id) {
+                throw new Exception("Subscription is not found");
+            }
+            $this->subscriptionService->deactivateSubscription(subId: $id);
+            return ResponseHelper::successResponse(
+                message: "Subscription deleted Successfully..!"
             );
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());

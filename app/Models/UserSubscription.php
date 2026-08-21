@@ -23,7 +23,8 @@ class UserSubscription extends Model
         'image_id',
         'coupon',
         'order_id',
-        'status'
+        'status',
+        'is_delete'
     ];
 
     public function user()

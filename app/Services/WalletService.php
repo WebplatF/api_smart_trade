@@ -91,7 +91,7 @@ class WalletService
                             tradeId: 0,
                             direction: "Inward",
                             description: "Amount Deposited",
-                            createdDate: Carbon::now()->toDateString()
+                            createdDate: $timestamp->toDateString()
                         );
                     }
                     $data = WalletResources::make($userWallet);

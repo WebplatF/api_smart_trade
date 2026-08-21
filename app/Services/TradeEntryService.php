@@ -110,22 +110,14 @@ class TradeEntryService
                     if ($tradeEdit->win_loss === $tradeEntryEditModel->winLoss) {
                         if ($tradeEdit->win_loss == "WIN") {
                             $actualBal = $wallet->amount - $oldAmount + $tradeAmt;
-                            $walletReduce = $oldAmount + $tradeAmt;
-                            $action = 'withdraw';
                         } else {
                             $actualBal = $wallet->amount + $oldAmount - $tradeAmt;
-                            $walletReduce = $oldAmount - $tradeAmt;
-                            $action = 'deposite';
                         }
                     } else {
                         if ($tradeEdit->win_loss === 'WIN' && $tradeEntryEditModel->winLoss === 'LOSS') {
                             $actualBal = $wallet->amount - $oldAmount - $tradeAmt;
-                            $walletReduce = $oldAmount - $tradeAmt;
-                            $action = 'withdraw';
                         } else {
                             $actualBal = $wallet->amount + $oldAmount + $tradeAmt;
-                            $walletReduce = $oldAmount + $tradeAmt;
-                            $action = 'deposite';
                         }
                     }
                     if (bccomp($actualBal, '0.00', 2) < 0) {

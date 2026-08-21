@@ -315,7 +315,7 @@ class SubscriptionService
                 $runningSubscription = UserSubscription::where('user_id', $user->user_id)
                     ->where('status', 'approved')
                     ->where('is_delete', 0)
-                    ->where('end_date', '>=', Carbon::now())
+                    ->where('end_date', '>=', Carbon::now()->toDateString())
                     ->first();
                 if ($runningSubscription) {
                     $runningSubscription->update(['is_delete' => 1]);

@@ -52,7 +52,8 @@ class AuthService
                 userDetails: [
                     'id' => $user->id,
                     'name' => $user->name ?? "",
-                    'email' => $user->email ?? ""
+                    'email' => $user->email ?? "",
+                    'login_devices' => $user->login_ip ?? ""
                 ]
             );
             return $response;
@@ -128,9 +129,9 @@ class AuthService
             // Prevent duplicate IP
             if (!in_array($loginIp, $ips, true)) {
                 // Allow only 2 unique IPs
-                if (count($ips) >= 2) {
-                    throw new Exception('Login limit exceeded. Only 2 devices allowed');
-                }
+                // if (count($ips) >= 2) {
+                //     throw new Exception('Login limit exceeded. Only 2 devices allowed');
+                // }
                 $ips[] = $loginIp;
             }
             $user->update([

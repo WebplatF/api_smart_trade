@@ -38,6 +38,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
     $router->post('/auth/verify_otp', 'AuthController@verifyOtp');
     $router->post('/auth/change_password', 'AuthController@chnagePassword');
     $router->post('/auth/admin_login', 'AuthController@adminLogin');
+    $router->post('/auth/remove_devices', ['middleware' => 'token', 'uses' => 'AuthController@removeDevices']);
     $router->post('/auth/logout', ['middleware' => 'token', 'uses' => 'AuthController@logout']);
     $router->get('/user/profile', ['middleware' => 'token', 'uses' => 'User\UserController@userProfile']);
     $router->post('/payment/order', ['middleware' => 'token', 'uses' => 'Payment\PaymentController@orderUnlock']);

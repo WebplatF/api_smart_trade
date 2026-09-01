@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helper\ResponseHelper;
 use App\Services\AuthService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -166,6 +167,24 @@ class AuthController extends Controller
                 password: $request->get('password')
             );
             return ResponseHelper::successResponse(data: $response, message: "Password changed successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    public function removeDevices(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'new_devices' => 'required|strict_string',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $this->authService->removeAllDevice(
+                userId: $request->get('user_id'),
+                newDevice: $request->get('new_devices'),
+            );
+            return ResponseHelper::successResponse(message: "All devices removed successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

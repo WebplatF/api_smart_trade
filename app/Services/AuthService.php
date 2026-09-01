@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helper\DatabaseErrorHelper;
 use App\Models\OtpMaster;
 use App\Models\StaffMaster;
 use App\Models\UserMaster;
@@ -332,6 +333,31 @@ class AuthService
             return $user;
         } catch (QueryException $e) {
             throw new Exception($e->errorInfo[2] ?? $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Remove All Device and Add new devices
+     *
+     * @param integer $userId
+     * @param string $newDevice
+     * @return void
+     */
+    public function removeAllDevice(int $userId, string $newDevice)
+    {
+        try {
+            $user = UserMaster::where('is_delete', 0)->find($userId);
+            if (!$user) {
+                throw new Exception("No users found");
+            }
+            $loginIp = trim($newDevice);
+
+            $user->update([
+                'login_ip' => [$loginIp]
+            ]);
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

@@ -244,7 +244,7 @@ class CourseController extends Controller
             $returnResponse = $this->courseService->shuffleCourseLesson(
                 shuffleList: $shuffleList
             );
-            return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
+            return ResponseHelper::successResponse(data: $returnResponse, message: "Lesson Arranged Successfully...!");
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }

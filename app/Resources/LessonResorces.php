@@ -11,6 +11,7 @@ class LessonResorces extends JsonResource
         return [
             "id" => $this->id,
             "title" => $this->title,
+            'order_sort' => $this->order_sort ?? 0,
             "is_delete" => (bool)$this->is_delete ?? false,
             "videos" => CourseVideoResources::collection($this->videos ?? [])
         ];

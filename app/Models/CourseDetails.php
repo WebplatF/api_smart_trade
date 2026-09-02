@@ -11,6 +11,7 @@ class CourseDetails extends Model
     protected $fillable = [
         'course_id',
         'title',
+        'order_sort',
         'is_delete'
     ];
 

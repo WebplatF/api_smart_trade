@@ -221,6 +221,35 @@ class CourseController extends Controller
         }
     }
     /**
+     * @param Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function shuffleCourseLesson(Request $request)
+    {
+        try {
+            $role = $request->get('role');
+            if ($role != "admin") {
+                return ResponseHelper::failureResponse(message: "Forbidden", code: 403);
+            }
+            $Validator = Validator::make($request->all(), [
+                'shuffle_list' =>
+                'required|array|array_of_objects_with_schema:
+                    detail_id:int,
+                    sort_order:int',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $shuffleList = $request->get('shuffle_list');
+            $returnResponse = $this->courseService->shuffleCourseLesson(
+                shuffleList: $shuffleList
+            );
+            return ResponseHelper::successResponse(data: $returnResponse, message: "Video Added Successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
+    /**
      * @param Request $request
      * @return JsonResponse
      */

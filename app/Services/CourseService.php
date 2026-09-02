@@ -181,6 +181,28 @@ class CourseService
         }
     }
     /**
+     * @param array $shuffleList
+     * @return array $courseDetails
+     * @throws Exception
+     */
+    public function shuffleCourseLesson(array $shuffleList)
+    {
+        try {
+            return DB::transaction(function () use ($shuffleList) {
+                foreach ($shuffleList as $item) {
+                    CourseDetails::where('id', $item['detail_id'])
+                        ->update([
+                            'order_sort' => $item['sort_order']
+                        ]);
+                }
+            });
+        } catch (QueryException $e) {
+            throw new Exception("Course lesson shuffled Failed :" . ($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception("Course lesson shuffled Failed :" . $e->getMessage());
+        }
+    }
+    /**
      * @param string $path
      * @return string $cdnUrl
      * @throws Exception

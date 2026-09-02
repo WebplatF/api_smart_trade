@@ -94,6 +94,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
             $router->post('/lesson_create', 'Admin\CourseController@courseDetailCreation');
             $router->post('/video_map', 'Admin\CourseController@lessonVideoMap');
             $router->patch('/video_shuffle', 'Admin\CourseController@lessonVideoShuffle');
+            $router->patch('/lesson_shuffle', 'Admin\CourseController@shuffleCourseLesson');
             $router->post('/edit', 'Admin\CourseController@courseEdit');
             $router->post('/video_thumbnail', 'Admin\CourseController@editVideoThumbnail');
             $router->post('/lesson_edit', 'Admin\CourseController@courseDetailEdit');

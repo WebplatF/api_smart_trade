@@ -200,9 +200,9 @@ class AuthService
             ]);
             return true;
         } catch (QueryException $e) {
-            throw new Exception("Logout failed: " . $e->errorInfo[2] ?? $e->getMessage());
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Logout failed: " . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
     /**

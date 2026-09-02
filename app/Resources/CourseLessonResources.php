@@ -11,7 +11,8 @@ class CourseLessonResources extends JsonResource
         return [
             "id" => $this->id,
             'title' => $this->title ?? "",
-                        "video_count" => $this->videos_count ?? 0,
+            "video_count" => $this->videos_count ?? 0,
+            'order_sort' => $this->order_sort ?? 0,
             'is_delete' => (bool)$this->is_delete ?? false,
         ];
     }

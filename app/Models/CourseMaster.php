@@ -22,6 +22,6 @@ class CourseMaster extends Model
 
     public function lesson()
     {
-        return $this->hasMany(CourseDetails::class, 'course_id');
+        return $this->hasMany(CourseDetails::class, 'course_id')->where('is_delete', 0);
     }
 }

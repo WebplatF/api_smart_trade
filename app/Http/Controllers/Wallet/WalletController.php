@@ -102,10 +102,10 @@ class WalletController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }
     }
-    public function getSummary(Request $request, string $walletId)
+    public function getSummary(Request $request, string $id)
     {
         try {
-            $returnData = $this->walletService->getWalletSummary(walletId: (int)$walletId);
+            $returnData = $this->walletService->getWalletSummary(walletId: (int)$id);
             return ResponseHelper::successResponse(data: $returnData, message: "user wallet summary arrived successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);

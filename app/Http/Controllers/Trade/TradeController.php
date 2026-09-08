@@ -69,4 +69,20 @@ class TradeController extends Controller
             return ResponseHelper::failureResponse(message: $e->getMessage());
         }
     }
+    /**
+     * Trade Entry Edit
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function delete(int $id)
+    {
+        try {
+            $walletId = (int)$id;
+            $this->tradeEntryService->deleteTrade(id: $walletId);
+            return ResponseHelper::successResponse(message: "Trade entry list deleted successfully...!");
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage());
+        }
+    }
 }

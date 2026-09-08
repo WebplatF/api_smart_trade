@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helper\DatabaseErrorHelper;
+use App\Models\PaymentLogs;
 use App\Models\TradeEntry;
 use App\Models\Wallet;
 use App\RequestModel\TradeEntryCreateModel;
@@ -79,9 +81,9 @@ class TradeEntryService
                 ];
             });
         } catch (QueryException $e) {
-            throw new Exception('Trade entry creation Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Trade entry creation Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
     /**
@@ -152,15 +154,19 @@ class TradeEntryService
                     //     isLog: false,
                     //     date: $tradeEntryEditModel->date
                     // );
+                    PaymentLogs::where('trade_id', $tradeEdit->id)
+                        ->where('action', 'TRADE ENTRY')
+                        ->delete();
+
                     $this->walletService->PaymentLogsActions(
                         amount: $tradeAmt,
                         balance: $actualBal,
                         walletId: $tradeEntryEditModel->walletId,
                         action: "TRADE ENTRY",
                         tradeId: $tradeEdit->id,
-                        direction: $oldAmount < $tradeAmt
+                        direction: $tradeEntryEditModel->winLoss == "WIN"
                             ? "Inward" : "Outward",
-                        description: "Amount adjusted by trade of " . $oldDate,
+                        description: "Amount added of trade",
                         createdDate: $tradeEntryEditModel->date
                     );
                     return (object)[
@@ -169,9 +175,9 @@ class TradeEntryService
                 }
             });
         } catch (QueryException $e) {
-            throw new Exception('Trade entry edit Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Trade entry edit Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
     /**
@@ -194,6 +200,63 @@ class TradeEntryService
             throw new Exception('Trade entry list Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
         } catch (Exception $e) {
             throw new Exception("Trade entry list Failed :" . $e->getMessage());
+        }
+    }
+    /**
+     * Trade Delete
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function deleteTrade(int $id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+
+                $trade = TradeEntry::where('is_delete', 0)
+                    ->where('id', $id)
+                    ->first();
+
+                if (!$trade) {
+                    throw new Exception('Trade not found');
+                }
+
+                $wallet = Wallet::where('is_delete', 0)
+                    ->where('id', $trade->wallet_id)
+                    ->first();
+
+                if (!$wallet) {
+                    throw new Exception('User wallet not found');
+                }
+
+                // Reverse trade amount
+                if ($trade->win_loss === 'WIN') {
+
+                    $wallet->amount = bcsub(
+                        (string) $wallet->amount,
+                        (string) ($trade->profit ?? 0),
+                        2
+                    );
+                } else {
+
+                    $wallet->amount = bcadd(
+                        (string) $wallet->amount,
+                        (string) ($trade->loss ?? 0),
+                        2
+                    );
+                }
+
+                $wallet->save();
+                // Delete only payment log related to this trade
+                PaymentLogs::where('trade_id', $trade->id)->delete();
+                // Soft delete trade
+                $trade->is_delete = 1;
+                $trade->save();
+            });
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 }

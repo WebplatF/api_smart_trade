@@ -66,6 +66,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->get('/wallet/chart', 'Wallet\WalletController@getBlanceSummay');
         $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
         $router->get('/trade/{id}', 'Trade\TradeController@list');
+        $router->delete('/trade/delete/{id}', 'Trade\TradeController@delete');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

@@ -369,7 +369,7 @@ class WalletService
                 "total_deposit" =>   $totalDeposit ?? "0.00",
                 "years" => $years ?? [],
                 "months" => $months ?? [],
-                "calender_month" => $lastMonth,
+                "calender_month" => $lastMonth ?? [],
             ];
             return WalletSummaryResources::make($data);
         } catch (QueryException $e) {

@@ -29,7 +29,7 @@ $router->post('/get_invoice', 'Admin\SubscriptionController@getInvoice');
 $router->group(['prefix' => 'webhooks'], function () use ($router) {
     $router->post('/video_status', 'Webhooks\WebhooksController@videoStatusUpdate');
 });
-$router->get('/wallet_summary/{id}', 'Wallet\WalletController@getSummary');
+$router->post('/wallet/calendar', 'Wallet\WalletController@getMonthSummay');
 $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($router) {
     $router->post('/user/register', 'User\UserController@register');
     $router->post('/staff/register', 'User\UserController@staffRegister');
@@ -61,6 +61,8 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->get('/wallet', 'Wallet\WalletController@getWallet');
         $router->post('/wallet/create', 'Wallet\WalletController@walleteCreation');
         $router->post('/wallet/action', 'Wallet\WalletController@walleteAction');
+        $router->post('/wallet/calendar', 'Wallet\WalletController@getMonthSummay');
+        $router->get('/wallet/summary/id', 'Wallet\WalletController@getSummary');
         $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
         $router->get('/trade/{id}', 'Trade\TradeController@list');
     });

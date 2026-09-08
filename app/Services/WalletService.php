@@ -6,6 +6,7 @@ use App\Helper\DatabaseErrorHelper;
 use App\Models\PaymentLogs;
 use App\Models\TradeEntry;
 use App\Models\Wallet;
+use App\Resources\CalenderMonthResources;
 use App\Resources\PaymentLogsResources;
 use App\Resources\WalletResources;
 use App\Resources\WalletSummaryResources;
@@ -372,6 +373,54 @@ class WalletService
                 "calender_month" => $lastMonth ?? [],
             ];
             return WalletSummaryResources::make($data);
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Calender View Summary
+     *
+     * @param integer $walletId
+     * @param string $month
+     * @param string $year
+     * @return array
+     */
+    public function getCalenderData(
+        int $walletId,
+        string $month,
+        string $year
+    ) {
+        try {
+            $targetMonth = Carbon::parse("1 {$month} {$year}");
+            $tradeHistory = TradeEntry::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->get();
+            $calendarMonth = $tradeHistory
+                ->filter(
+                    fn($item) =>
+                    Carbon::parse($item->date)->isSameMonth($targetMonth)
+                )
+                ->groupBy(
+                    fn($item) =>
+                    Carbon::parse($item->date)->format('d-m-Y')
+                )
+                ->map(function ($trades, $date) {
+
+                    $amount = $trades->sum(
+                        fn($trade) => ($trade->profit ?? 0) - ($trade->loss ?? 0)
+                    );
+
+                    return [
+                        'date'        => $date,
+                        'trade_count' => $trades->count(),
+                        'amount'      => (string) $amount,
+                        'direction'   => $amount >= 0 ? 'Inward' : 'Outward',
+                    ];
+                })
+                ->values();
+            return CalenderMonthResources::collection($calendarMonth)->resolve();
         } catch (QueryException $e) {
             throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {

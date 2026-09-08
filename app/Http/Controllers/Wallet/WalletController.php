@@ -155,8 +155,8 @@ class WalletController extends Controller
         try {
             $Validator = Validator::make($request->all(), [
                 'wallet_id' => 'required|strict_int',
-                'year' => 'required|strict_string',
-                'tag' => 'required|strict_string',
+                'tag'       => 'required|strict_string',
+                'year'      => 'required_if:tag,weekly,monthly|strict_string',
                 'month'     => 'required_if:tag,weekly|strict_string',
             ]);
             if ($Validator->fails()) {

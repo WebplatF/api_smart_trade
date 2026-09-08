@@ -455,8 +455,8 @@ class WalletService
                 ->where('win_loss', 'WIN')
                 ->count();
             $winPercentage = $totalTrades > 0
-                ? ($winTrades / $totalTrades) * 100
-                : 0;
+                ? number_format(($winTrades / $totalTrades) * 100, 2) . '%'
+                : '0%';
             $views = match ($tag) {
                 'weekly' => $this->getWeekData(
                     walletId: $walletId,
@@ -504,7 +504,8 @@ class WalletService
     private function getWeekData(int $walletId, string $month, string $year)
     {
         try {
-            $targetMonth = Carbon::parse("1 {$month} {$year}");
+            $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
+                ->startOfMonth();
             $paymentLogs = PaymentLogs::where('is_delete', 0)
                 ->where('wallet_id', $walletId)->get();
             $weeklyBalance = $paymentLogs
@@ -529,7 +530,7 @@ class WalletService
                     });
                     $lastLog = $logs->sortBy('created_at')->last();
                     return [
-                        'week' => 'Week ' . $weekNumber,
+                        'week' => $weekNumber,
                         // 'amount' => number_format($amount, 2, '.', ''),
                         'amount' => $lastLog->balance ?? '0.00',
                     ];

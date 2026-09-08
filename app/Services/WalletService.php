@@ -371,7 +371,7 @@ class WalletService
                 "months" => $months ?? [],
                 "calender_month" => $lastMonth,
             ];
-            return WalletSummaryResources::make($data)->resolve();
+            return WalletSummaryResources::make($data);
         } catch (QueryException $e) {
             throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {

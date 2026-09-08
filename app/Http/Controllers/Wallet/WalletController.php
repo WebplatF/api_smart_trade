@@ -119,7 +119,7 @@ class WalletController extends Controller
         }
     }
     /**
-     * Wallet Summary 
+     * Wallet Monthly Summary 
      *
      * @param Request $request
      * @return JsonResponse
@@ -139,6 +139,34 @@ class WalletController extends Controller
             $month = $request->get('month');
             $year = $request->get('year');
             $returnData = $this->walletService->getCalenderData(walletId: (int)$walletId, month: $month, year: $year);
+            return ResponseHelper::successResponse(data: $returnData, message: "user calender summary arrived successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * Wallet Balance Summary 
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getBlanceSummay(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'wallet_id' => 'required|strict_int',
+                'year' => 'required|strict_string',
+                'tag' => 'required|strict_string',
+                'month'     => 'required_if:tag,weekly|strict_string',
+            ]);
+            if ($Validator->fails()) {
+                return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
+            }
+            $tag = $request->get('tag');
+            $walletId = $request->get('wallet_id');
+            $month = $request->get('month');
+            $year = $request->get('year');
+            $returnData = $this->walletService->getChartSummary(walletId: (int)$walletId, month: $month, year: $year, tag: $tag);
             return ResponseHelper::successResponse(data: $returnData, message: "user calender summary arrived successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);

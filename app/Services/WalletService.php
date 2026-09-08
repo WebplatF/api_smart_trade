@@ -427,4 +427,204 @@ class WalletService
             throw new Exception($e->getMessage());
         }
     }
+    /**
+     * Get Chart Summary
+     *
+     * @param integer $walletId
+     * @param string|null $month
+     * @param string $year
+     * @param string $tag
+     * @return array
+     */
+    public function getChartSummary(
+        int $walletId,
+        ?string $month,
+        string $year,
+        string $tag,
+    ) {
+        try {
+            $tradeHistory = TradeEntry::where('wallet_id', $walletId)->get();
+            $totalWin = $tradeHistory
+                ->where('win_loss', 'WIN')
+                ->sum('profit');
+            $totalLoss = $tradeHistory
+                ->where('win_loss', 'LOSS')
+                ->sum('loss');
+            $totalTrades = $tradeHistory->count();
+            $winTrades = $tradeHistory
+                ->where('win_loss', 'WIN')
+                ->count();
+            $winPercentage = $totalTrades > 0
+                ? ($winTrades / $totalTrades) * 100
+                : 0;
+            $views = match ($tag) {
+                'weekly' => $this->getWeekData(
+                    walletId: $walletId,
+                    month: $month,
+                    year: $year
+                ),
+                'monthly' => $this->getMonthData(
+                    walletId: $walletId,
+                    year: $year
+                ),
+                'yearly' => $this->getYearData(
+                    walletId: $walletId
+                ),
+                default => $this->getYearData(
+                    walletId: $walletId
+                ),
+            };
+            $da = [
+                "total_win" => $totalWin ?? "0.00",
+                "total_loss" => $totalLoss ?? "0.00",
+                "win_percentage" => $winPercentage ?? "0%",
+                "view" => $tag
+            ];
+            $key = match ($tag) {
+                'weekly' => 'calender_month',
+                'monthly' => 'calender_year',
+                default => 'calender_years',
+            };
+            $da[$key] = $views ?? [];
+            return $da;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Weekly Data
+     *
+     * @param integer $walletId
+     * @param string $month
+     * @param string $year
+     * @return array
+     */
+    private function getWeekData(int $walletId, string $month, string $year)
+    {
+        try {
+            $targetMonth = Carbon::parse("1 {$month} {$year}");
+            $paymentLogs = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)->get();
+            $weeklyBalance = $paymentLogs
+                ->filter(function ($item) use ($targetMonth) {
+                    return Carbon::parse($item->created_at)
+                        ->isSameMonth($targetMonth);
+                })
+                ->groupBy(function ($item) {
+                    $day = Carbon::parse($item->created_at)->day;
+
+                    return (int) ceil($day / 7);
+                });
+            // Always create all weeks
+            $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
+            $weeklyBalance = collect(range(1, $weeksInMonth))
+                ->map(function ($weekNumber) use ($weeklyBalance, $targetMonth) {
+                    $logs = $weeklyBalance->get($weekNumber, collect());
+                    $amount = $logs->sum(function ($log) {
+                        return $log->direction === 'Inward'
+                            ? (float) $log->amount
+                            : -(float) $log->amount;
+                    });
+                    $lastLog = $logs->sortBy('created_at')->last();
+                    return [
+                        'week' => 'Week ' . $weekNumber,
+                        // 'amount' => number_format($amount, 2, '.', ''),
+                        'amount' => $lastLog->balance ?? '0.00',
+                    ];
+                })
+                ->values();
+            return $weeklyBalance;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Month Data
+     *
+     * @param integer $walletId
+     * @param string $year
+     * @return array
+     */
+    private function getMonthData(int $walletId, string $year)
+    {
+        try {
+            $paymentLogs = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)->get();
+            $monthlyBalance = $paymentLogs
+                ->filter(function ($item) use ($year) {
+                    return Carbon::parse($item->created_at)->year == $year;
+                })
+                ->groupBy(function ($item) {
+                    return Carbon::parse($item->created_at)->month;
+                });
+            $monthlyBalance = collect(range(1, 12))
+                ->map(function ($monthNumber) use ($monthlyBalance, $year) {
+                    $logs = $monthlyBalance->get($monthNumber, collect());
+                    $amount = $logs->sum(function ($log) {
+                        return $log->direction === 'Inward'
+                            ? (float) $log->amount
+                            : -(float) $log->amount;
+                    });
+                    $lastLog = $logs
+                        ->sortBy('created_at')
+                        ->last();
+                    return [
+                        'month' => $monthNumber,
+                        'month_name' => Carbon::create($year, $monthNumber, 1)->format('M'),
+                        // 'amount' => number_format($amount, 2, '.', ''),
+                        'amount' => $lastLog->balance ?? '0.00',
+                    ];
+                })
+                ->values();
+            return $monthlyBalance;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Month Data
+     *
+     * @param integer $walletId
+     * @return array
+     */
+    private function getyearData(int $walletId)
+    {
+        try {
+            $paymentLogs = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)->get();
+            $yearlyBalance = $paymentLogs
+                ->groupBy(fn($item) => Carbon::parse($item->created_at)->year)
+                ->sortKeys()
+                ->values()
+                ->map(function ($logs, $index) {
+                    $logs = $logs->sortBy('created_at');
+                    $year = Carbon::parse($logs->first()->created_at)->year;
+                    $lastLog = $logs->last();
+                    $amount = $logs->sum(function ($log) {
+                        return $log->direction === 'Inward'
+                            ? (float) $log->amount
+                            : -(float) $log->amount;
+                    });
+
+                    return [
+                        // 'year' => $index + 1,
+                        'year' => (string) $year,
+                        // 'amount' => number_format($amount, 2, '.', ''),
+                        'amount' => number_format((float) ($lastLog->balance ?? 0), 2, '.', ''),
+                    ];
+                })
+                ->values();
+            return $yearlyBalance;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }

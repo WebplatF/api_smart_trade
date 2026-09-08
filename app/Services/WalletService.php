@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Helper\DatabaseErrorHelper;
 use App\Models\PaymentLogs;
+use App\Models\TradeEntry;
 use App\Models\Wallet;
 use App\Resources\PaymentLogsResources;
 use App\Resources\WalletResources;
+use App\Resources\WalletSummaryResources;
 use App\ResponseModel\CommonListResponseModel;
 use Carbon\Carbon;
 use Exception;
@@ -292,6 +295,85 @@ class WalletService
             });
         } catch (QueryException $e) {
             throw new Exception(($e->errorInfo[2] ?? $e->getMessage()));
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Get Wallet Summary
+     *
+     * @param integer $walletId
+     * @return array
+     */
+    public function getWalletSummary(int $walletId)
+    {
+        try {
+            $wallet = Wallet::where('is_delete', 0)->find($walletId);
+            if (!$wallet) {
+                throw new Exception("User wallet not found");
+            }
+            // Payment summary
+            $paymentSummary = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->select(
+                    DB::raw("SUM(CASE WHEN action = 'DEPOSITE' THEN amount ELSE 0 END) as total_deposit"),
+                    DB::raw("SUM(CASE WHEN action = 'WITHDRAWAL' THEN amount ELSE 0 END) as total_withdrawal"),
+                    DB::raw("SUM(CASE WHEN action = 'TRADE ENTRY' AND direction = 'Inward' THEN amount ELSE 0 END) as total_profit"),
+                    DB::raw("SUM(CASE WHEN action = 'TRADE ENTRY' AND direction = 'Outward' THEN amount ELSE 0 END) as total_loss")
+                )
+                ->first();
+            $totalDeposit = $paymentSummary->total_deposit ?? 0;
+            $totalWithdrawal = $paymentSummary->total_withdrawal ?? 0;
+            $totalProfit = $paymentSummary->total_profit ?? 0;
+            $totalLoss = $paymentSummary->total_loss ?? 0;
+            // Trade history
+            $tradeHistory = TradeEntry::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->get();
+            // Last month
+            $lastMonth = $tradeHistory
+                ->filter(fn($item) => Carbon::parse($item->created_at)->isLastMonth())
+                ->groupBy(fn($item) => Carbon::parse($item->date)->format('d-m-Y'))
+                ->map(function ($trades, $date) {
+                    $amount = $trades->sum(
+                        fn($trade) => ($trade->profit ?? 0) - ($trade->loss ?? 0)
+                    );
+                    return [
+                        'date'        => $date,
+                        'trade_count' => $trades->count(),
+                        'amount'      => (string) $amount,
+                        'direction'   => $amount >= 0 ? 'Inward' : 'Outward',
+                    ];
+                })
+                ->values();
+            // Available years
+            $years = $tradeHistory
+                ->pluck('created_at')
+                ->map(fn($date) => Carbon::parse($date)->format('Y'))
+                ->unique()
+                ->sortDesc()
+                ->values()
+                ->toArray();
+            // Available months
+            $months = $tradeHistory
+                ->pluck('created_at')
+                ->map(fn($date) => Carbon::parse($date)->format('M'))
+                ->unique()
+                ->values()
+                ->toArray();
+            $data = [
+                "wallet" => $wallet->amount ?? "0.00",
+                "total_profits" => $totalProfit ?? "0.00",
+                "total_loss" => $totalLoss ?? "0.00",
+                "total_withdraw" =>  $totalWithdrawal ?? "0.00",
+                "total_deposit" =>   $totalDeposit ?? "0.00",
+                "years" => $years ?? [],
+                "months" => $months ?? [],
+                "calender_month" => $lastMonth,
+            ];
+            return WalletSummaryResources::make($data)->resolve();
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

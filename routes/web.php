@@ -29,7 +29,7 @@ $router->post('/get_invoice', 'Admin\SubscriptionController@getInvoice');
 $router->group(['prefix' => 'webhooks'], function () use ($router) {
     $router->post('/video_status', 'Webhooks\WebhooksController@videoStatusUpdate');
 });
-
+$router->get('/wallet_summary/{id}', 'Wallet\WalletController@getSummary');
 $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($router) {
     $router->post('/user/register', 'User\UserController@register');
     $router->post('/staff/register', 'User\UserController@staffRegister');

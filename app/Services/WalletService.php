@@ -317,8 +317,8 @@ class WalletService
             $paymentSummary = PaymentLogs::where('is_delete', 0)
                 ->where('wallet_id', $walletId)
                 ->select(
-                    DB::raw("SUM(CASE WHEN action = 'DEPOSITE' THEN amount ELSE 0 END) as total_deposit"),
-                    DB::raw("SUM(CASE WHEN action = 'WITHDRAWAL' THEN amount ELSE 0 END) as total_withdrawal"),
+                    DB::raw("SUM(CASE WHEN action = 'DEPOSIT' THEN amount ELSE 0 END) as total_deposit"),
+                    DB::raw("SUM(CASE WHEN action = 'WITHDRAW' THEN amount ELSE 0 END) as total_withdrawal"),
                     DB::raw("SUM(CASE WHEN action = 'TRADE ENTRY' AND direction = 'Inward' THEN amount ELSE 0 END) as total_profit"),
                     DB::raw("SUM(CASE WHEN action = 'TRADE ENTRY' AND direction = 'Outward' THEN amount ELSE 0 END) as total_loss")
                 )

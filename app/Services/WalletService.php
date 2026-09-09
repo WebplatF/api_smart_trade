@@ -333,7 +333,7 @@ class WalletService
                 ->get();
             // Last month
             $lastMonth = $tradeHistory
-                ->filter(fn($item) => Carbon::parse($item->date)->isLastMonth())
+                ->filter(fn($item) => Carbon::parse($item->date)->isCurrentMonth())
                 ->groupBy(fn($item) => Carbon::parse($item->date)->format('d-m-Y'))
                 ->map(function ($trades, $date) {
                     $amount = $trades->sum(
@@ -455,8 +455,8 @@ class WalletService
                 ->where('win_loss', 'WIN')
                 ->count();
             $winPercentage = $totalTrades > 0
-                ? number_format(($winTrades / $totalTrades) * 100, 2) . '%'
-                : '0%';
+                ? round(($winTrades / $totalTrades) * 100, 2)
+                : 0;
             $views = match ($tag) {
                 'weekly' => $this->getWeekData(
                     walletId: $walletId,

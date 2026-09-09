@@ -333,7 +333,7 @@ class WalletService
                 ->get();
             // Last month
             $lastMonth = $tradeHistory
-                ->filter(fn($item) => Carbon::parse($item->created_at)->isLastMonth())
+                ->filter(fn($item) => Carbon::parse($item->date)->isLastMonth())
                 ->groupBy(fn($item) => Carbon::parse($item->date)->format('d-m-Y'))
                 ->map(function ($trades, $date) {
                     $amount = $trades->sum(

@@ -63,7 +63,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->post('/wallet/action', 'Wallet\WalletController@walleteAction');
         $router->post('/wallet/calendar', 'Wallet\WalletController@getMonthSummay');
         $router->get('/wallet/summary/{id}', 'Wallet\WalletController@getSummary');
-        $router->get('/wallet/chart', 'Wallet\WalletController@getBlanceSummay');
+        $router->post('/wallet/chart', 'Wallet\WalletController@getBlanceSummay');
         $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
         $router->get('/trade/{id}', 'Trade\TradeController@list');
         $router->delete('/trade/delete/{id}', 'Trade\TradeController@delete');

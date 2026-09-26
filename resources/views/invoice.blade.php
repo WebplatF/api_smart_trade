@@ -297,12 +297,37 @@ $negative = $num < 0; $num=abs($num); $parts=explode( '.' , number_format($num, 
 
     $sgstRate = 9;
 
+    $totalTaxRate = $cgstRate + $sgstRate;
+
+    // $cgst =
+    // ($taxableAmount * $cgstRate) / 100;
+
+    // $sgst =
+    // ($taxableAmount * $sgstRate) / 100;
+    $tag = 'Inclusive';
+    if ($tag === 'Inclusive') {
+
+    // GST is already included in grand_total
+
+    $cgst =
+    ($grandTotal * $cgstRate) /
+    (100 + $totalTaxRate);
+
+    $sgst =
+    ($grandTotal * $sgstRate) /
+    (100 + $totalTaxRate);
+
+    } else {
+
+    // GST is exclusive
+    // Calculate GST from taxable amount
+
     $cgst =
     ($taxableAmount * $cgstRate) / 100;
 
     $sgst =
     ($taxableAmount * $sgstRate) / 100;
-
+    }
 
     /*
     |--------------------------------------------------------------------------

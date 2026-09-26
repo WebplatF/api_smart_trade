@@ -202,11 +202,28 @@ class PaymentService
                             $discountAmount = (float) $invoice->discount;
                         }
                         // Amount after discount
-                        $taxableAmount = $subTotal - $discountAmount;
+                        // $taxableAmount = $subTotal - $discountAmount;
+                        $amountAfterDiscount = $subTotal - $discountAmount;
                         $taxPercentage = 18;
                         // GST calculated after discount
-                        $taxAmount = ($taxableAmount * $taxPercentage) / 100;
-                        $grandTotal = $taxableAmount + $taxAmount;
+                        // $taxAmount = ($taxableAmount * $taxPercentage) / 100;
+                        // $grandTotal = $taxableAmount + $taxAmount;
+                        $tag = 'Inclusive';
+                        if ($tag === 'Inclusive') {
+                            // GST is already included in the amount
+                            $grandTotal = $amountAfterDiscount;
+                            // Extract GST from inclusive amount
+                            $taxAmount = ($grandTotal * $taxPercentage) / (100 + $taxPercentage);
+                            // Amount excluding GST
+                            $taxableAmount = $grandTotal - $taxAmount;
+                        } else {
+                            // GST is NOT included in the amount
+                            $taxableAmount = $amountAfterDiscount;
+                            // Add GST
+                            $taxAmount = ($taxableAmount * $taxPercentage) / 100;
+                            // Final amount including GST
+                            $grandTotal = $taxableAmount + $taxAmount;
+                        }
                         $invoice->update([
                             'sub_total'   => $subTotal,
                             'grand_total' => $grandTotal,

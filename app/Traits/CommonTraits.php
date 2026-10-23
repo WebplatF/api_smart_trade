@@ -22,7 +22,8 @@ trait CommonTraits
                 'name' => $name,
                 'role' => $role,
                 'iat' => time(),
-                'exp' => time() + 43200
+                // 'exp' => time() + 43200
+                'exp' => time() + 86400
             ];
             $secretkey = config('AppConfig.jwt_key');
             return JWT::encode($payload, $secretkey, 'HS256');
@@ -46,7 +47,8 @@ trait CommonTraits
                 'type' => 'refresh',
                 'role' => $role,
                 'iat' => time(),
-                'exp' => time() + 45000
+                // 'exp' => time() + 45000/90000
+                'exp' => time() + 90000
             ];
             $secretkey = config('AppConfig.jwt_key');
             return JWT::encode($payload, $secretkey, 'HS256');

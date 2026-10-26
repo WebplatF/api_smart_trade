@@ -682,8 +682,8 @@ class WalletService
                     return [
                         'month' => $monthNumber,
                         'month_name' => Carbon::create($year, $monthNumber, 1)->format('M'),
-                        // 'amount' => number_format($amount, 2, '.', ''),
-                        'amount' => $lastLog->balance ?? '0.00',
+                        'amount' => number_format($amount, 2, '.', ''),
+                        // 'amount' => $lastLog->balance ?? '0.00',
                     ];
                 })
                 ->values();
@@ -723,7 +723,7 @@ class WalletService
                         // 'year' => $index + 1,
                         'year' => (string) $year,
                         // 'amount' => number_format($amount, 2, '.', ''),
-                        'amount' => number_format((float) ($lastLog->balance ?? 0), 2, '.', ''),
+                        'amount' => number_format((float) ($amount?? 0), 2, '.', ''),
                     ];
                 })
                 ->values();

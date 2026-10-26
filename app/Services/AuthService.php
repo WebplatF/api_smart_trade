@@ -227,12 +227,12 @@ class AuthService
             $accessToken = $this->generateAccessToken(
                 userId: $user->id,
                 name: $user->name,
-                role: $user->role
+                role: $decoded->role
             );
             $refreshToken = $this->generateRefreshToken(
                 userId: $user->id,
                 name: $user->name,
-                role: $user->role
+                role: $decoded->role
             );
             $loginResponse = new LoginResponseModel(
                 accessToken: $accessToken,

@@ -637,8 +637,8 @@ class WalletService
                     $lastLog = $logs->sortBy('created_at')->last();
                     return [
                         'week' => $weekNumber,
-                        // 'amount' => number_format($amount, 2, '.', ''),
-                        'amount' => $lastLog->balance ?? '0.00',
+                        'amount' => number_format($amount, 2, '.', ''),
+                        // 'amount' => $lastLog->balance ?? '0.00',
                     ];
                 })
                 ->values();

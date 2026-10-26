@@ -250,8 +250,9 @@ class TradeEntryService
                 // Delete only payment log related to this trade
                 PaymentLogs::where('trade_id', $trade->id)->delete();
                 // Soft delete trade
-                $trade->is_delete = 1;
-                $trade->save();
+                // $trade->is_delete = 1;
+                // $trade->save();
+                $trade->delete();
             });
         } catch (QueryException $e) {
             throw DatabaseErrorHelper::handle(e: $e);

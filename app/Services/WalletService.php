@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\DB;
 
 class WalletService
 {
+    private TradeEntryService $trade_entry_service;
+    public function __construct(TradeEntryService $trade_entry_service)
+    {
+        $this->trade_entry_service = $trade_entry_service;
+    }
     /**
      * Get User Wallet
      * @param int $userId
@@ -66,14 +71,20 @@ class WalletService
      *
      * @return object
      */
-    public function walleteCreation(int $userId, string $date, float $amount)
+    public function walleteCreation(int $userId, string $name, string $date, float $amount)
     {
         try {
-            return DB::transaction(function () use ($userId, $date, $amount) {
-                $wallet = Wallet::where('user_id', $userId)
+            return DB::transaction(function () use ($userId, $name, $date, $amount) {
+                $wallet = Wallet::where('user_id', $userId)->where('name', $name)
                     ->where('is_delete', 0)
                     ->first();
                 if (!$wallet) {
+                    $count = Wallet::where('user_id', $userId)
+                        ->where('is_delete', 0)
+                        ->count();
+                    if ($count > 15) {
+                        throw new Exception("wallet creation limit is reached.");
+                    }
                     $timestamp = Carbon::parse($date)->startOfDay();
                     $walletAmount = 0.00;
                     if ($amount > 0) {
@@ -105,9 +116,23 @@ class WalletService
                 }
             });
         } catch (QueryException $e) {
-            throw new Exception('Wallet creation Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Wallet creation Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function deleteWallet(int $walletId)
+    {
+        try {
+            DB::transaction(function () use ($walletId) {
+                TradeEntry::where('wallet_id', $walletId)->delete();
+                PaymentLogs::where('wallet_id', $walletId)->delete();
+                Wallet::where('id', $walletId)->delete();
+            });
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
     /**
@@ -140,9 +165,9 @@ class WalletService
             };
             return "";
         } catch (QueryException $e) {
-            throw new Exception('Wallet action Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Wallet action Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
     /**
@@ -193,9 +218,51 @@ class WalletService
                 return $log;
             });
         } catch (QueryException $e) {
-            throw new Exception('Payment logs action Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Payment logs Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function deletePaymentLog(int $paymentId)
+    {
+        try {
+            return DB::transaction(function () use ($paymentId) {
+                $log = PaymentLogs::find($paymentId);
+                if ($log->trade_id) {
+                    return   $this->trade_entry_service->deleteTrade(id: $log->trade_id);
+                }
+                $wallet = Wallet::where('is_delete', 0)
+                    ->where('id', $log->wallet_id)
+                    ->first();
+
+                if (!$wallet) {
+                    throw new Exception('User wallet not found');
+                }
+                // Reverse trade amount
+                if ($log->direction === 'Inward') {
+
+                    $wallet->amount = bcsub(
+                        (string) $wallet->amount,
+                        (string) ($log->amount ?? 0),
+                        2
+                    );
+                } else {
+
+                    $wallet->amount = bcadd(
+                        (string) $wallet->amount,
+                        (string) ($log->amount ?? 0),
+                        2
+                    );
+                }
+
+                $wallet->save();
+                // Delete only payment log related to this trade
+                $log->delete();
+            });
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -244,9 +311,9 @@ class WalletService
                 }
             });
         } catch (QueryException $e) {
-            throw new Exception('Wallet deposite Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));
+            throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
-            throw new Exception("Wallet deposite Failed :" . $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 

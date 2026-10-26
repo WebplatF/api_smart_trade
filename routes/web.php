@@ -67,6 +67,9 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->get('/wallet/{id}', 'Wallet\WalletController@getPaymentLogs');
         $router->get('/trade/{id}', 'Trade\TradeController@list');
         $router->delete('/trade/delete/{id}', 'Trade\TradeController@delete');
+        // new requirement
+        $router->delete('/wallet/delete/{walletId}', 'Wallet\WalletController@deleteWallet');
+        $router->delete('/payment_log/{logId}', 'Wallet\WalletController@deletePaymentLog');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

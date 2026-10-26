@@ -62,14 +62,16 @@ class WalletController extends Controller
         try {
             $userId = (int)$request->get('user_id');
             $Validator = Validator::make($request->all(), [
+                'name' => 'required|strict_string',
                 'date' => 'required|strict_string',
             ]);
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
+            $name = $request->get('name');
             $date = $request->get('date');
             $amount = $request->get('amount', 0);
-            $wallet = $this->walletService->walleteCreation(userId: $userId, date: $date, amount: $amount);
+            $wallet = $this->walletService->walleteCreation(name: $name, userId: $userId, date: $date, amount: $amount);
             return ResponseHelper::successResponse(data: $wallet, message: "user wallet created successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
@@ -168,6 +170,36 @@ class WalletController extends Controller
             $year = $request->get('year');
             $returnData = $this->walletService->getChartSummary(walletId: (int)$walletId, month: $month, year: $year, tag: $tag);
             return ResponseHelper::successResponse(data: $returnData, message: "user calender summary arrived successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * Payment Log Delete
+     *
+     * @param integer $logId
+     * @return JsonResponse
+     */
+    public function deletePaymentLog(int $logId)
+    {
+        try {
+            $this->walletService->deletePaymentLog(paymentId: $logId);
+            return ResponseHelper::successResponse(message: "payment history deleted successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    /**
+     * Wallet  Delete
+     *
+     * @param integer $walletId
+     * @return JsonResponse
+     */
+    public function deleteWallet(int $walletId)
+    {
+        try {
+            $this->walletService->deleteWallet(walletId: $walletId);
+            return ResponseHelper::successResponse(message: "wallet deleted successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

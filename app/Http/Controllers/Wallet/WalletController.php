@@ -29,8 +29,8 @@ class WalletController extends Controller
     {
         try {
             $userId = (int)$request->get('user_id');
-            // $wallet = $this->walletService->getWallet(userId: $userId);
-            return ResponseHelper::successResponse(message: "user wallet arrived successfully...!", code: 200);
+            $wallet = $this->walletService->getWallet(userId: $userId);
+            return ResponseHelper::successResponse(data: $wallet, message: "user wallet arrived successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

@@ -32,12 +32,8 @@ class WalletService
     {
         try {
             $wallet = Wallet::where('user_id', $userId)
-                ->where('is_delete', 0)
-                ->first();
-            if (!$wallet) {
-                return [];
-            }
-            $data = WalletResources::make($wallet);
+                ->where('is_delete', 0)->paginate(15);
+            $data = WalletResources::collection($wallet);
             return $data->resolve();
         } catch (QueryException $e) {
             throw new Exception('Wallet create Failed :' . ($e->errorInfo[2] ?? $e->getMessage()));

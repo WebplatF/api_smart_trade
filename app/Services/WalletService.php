@@ -87,6 +87,7 @@ class WalletService
                     }
                     $userWallet = Wallet::create([
                         'user_id' => $userId,
+                        'name' => $name,
                         'amount' => $walletAmount,
                         'wallet_create_date' => $timestamp,
                     ]);

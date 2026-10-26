@@ -15,14 +15,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WalletService
 {
-    private TradeEntryService $trade_entry_service;
-    public function __construct(TradeEntryService $trade_entry_service)
-    {
-        $this->trade_entry_service = $trade_entry_service;
-    }
     /**
      * Get User Wallet
      * @param int $userId
@@ -33,6 +29,7 @@ class WalletService
         try {
             $wallet = Wallet::where('user_id', $userId)
                 ->where('is_delete', 0)->paginate(15);
+            Log::info("ee");
             $data = WalletResources::collection($wallet);
             return $data->resolve();
         } catch (QueryException $e) {
@@ -225,7 +222,47 @@ class WalletService
             return DB::transaction(function () use ($paymentId) {
                 $log = PaymentLogs::find($paymentId);
                 if ($log->trade_id) {
-                    return   $this->trade_entry_service->deleteTrade(id: $log->trade_id);
+                    $trade = TradeEntry::where('is_delete', 0)
+                        ->where('id', $log->trade_id)
+                        ->first();
+
+                    if (!$trade) {
+                        throw new Exception('Trade not found');
+                    }
+
+                    $wallet = Wallet::where('is_delete', 0)
+                        ->where('id', $trade->wallet_id)
+                        ->first();
+
+                    if (!$wallet) {
+                        throw new Exception('User wallet not found');
+                    }
+
+                    // Reverse trade amount
+                    if ($trade->win_loss === 'WIN') {
+
+                        $wallet->amount = bcsub(
+                            (string) $wallet->amount,
+                            (string) ($trade->profit ?? 0),
+                            2
+                        );
+                    } else {
+
+                        $wallet->amount = bcadd(
+                            (string) $wallet->amount,
+                            (string) ($trade->loss ?? 0),
+                            2
+                        );
+                    }
+
+                    $wallet->save();
+                    // Delete only payment log related to this trade
+                    PaymentLogs::where('trade_id', $trade->id)->delete();
+                    // Soft delete trade
+                    // $trade->is_delete = 1;
+                    // $trade->save();
+                    $trade->delete();
+                    return;
                 }
                 $wallet = Wallet::where('is_delete', 0)
                     ->where('id', $log->wallet_id)

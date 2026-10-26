@@ -136,6 +136,7 @@ class WalletService
      */
     public function walleteAction(
         int $userId,
+        int $walletId,
         string $action,
         float $amount,
         string $date,
@@ -145,12 +146,14 @@ class WalletService
             $wallet = match ($action) {
                 'deposite' => $this->deposite(
                     userId: $userId,
+                    walletId: $walletId,
                     amount: $amount,
                     date: $date,
                     isLog: $isLog
                 ),
                 'withdraw' => $this->widthdraw(
                     userId: $userId,
+                    walletId: $walletId,
                     amount: $amount,
                     date: $date,
                     isLog: $isLog
@@ -302,6 +305,7 @@ class WalletService
 
     private function deposite(
         int $userId,
+        int $walletId,
         float $amount,
         string $date,
         bool $isLog = true
@@ -310,10 +314,10 @@ class WalletService
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");
             }
-            return DB::transaction(function () use ($userId, $amount, $isLog, $date) {
+            return DB::transaction(function () use ($userId, $amount, $isLog, $date, $walletId) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
-                    ->first();
+                    ->find($walletId);
                 if (!$wallet) {
                     throw new Exception("User wallet not found");
                 }
@@ -353,6 +357,7 @@ class WalletService
 
     private function widthdraw(
         int $userId,
+        int $walletId,
         float $amount,
         string $date,
         bool $isLog = true
@@ -361,10 +366,10 @@ class WalletService
             if ($amount <= 0) {
                 throw new Exception("Amount must be greater than zero.");
             }
-            return DB::transaction(function () use ($userId, $amount, $isLog, $date) {
+            return DB::transaction(function () use ($userId, $amount, $isLog, $date, $walletId) {
                 $wallet = Wallet::where('user_id', $userId)
                     ->where('is_delete', 0)
-                    ->first();
+                    ->find($walletId);
                 if (!$wallet) {
                     throw new Exception("User wallet not found");
                 }

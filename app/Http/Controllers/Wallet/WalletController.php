@@ -88,6 +88,7 @@ class WalletController extends Controller
         try {
             $userId = (int)$request->get('user_id');
             $Validator = Validator::make($request->all(), [
+                'wallet_id' => 'required|strict_int',
                 'date' => 'required|strict_string',
                 'action' => 'required|strict_string',
                 'amount' => 'required|strict_number',
@@ -95,10 +96,11 @@ class WalletController extends Controller
             if ($Validator->fails()) {
                 return ResponseHelper::failureResponse(message: $Validator->errors()->first(), code: 400);
             }
+            $walletId = (int)$request->get('wallet_id');
             $date = $request->get('date');
             $action = $request->get('action');
             $amount = (float)$request->get('amount', 0.0);
-            $walletReturn = $this->walletService->walleteAction(userId: $userId, action: $action, amount: $amount, date: $date);
+            $walletReturn = $this->walletService->walleteAction(walletId: $walletId, userId: $userId, action: $action, amount: $amount, date: $date);
             return ResponseHelper::successResponse(message: "user wallet created successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);

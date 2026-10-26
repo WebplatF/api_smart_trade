@@ -63,7 +63,7 @@ class TradeEntryService
                     'loss' => $tradeEntryCreateModel->loss,
                     'remark' => $tradeEntryCreateModel->remark,
                 ]);
-                $this->walletService->walleteAction(userId: $userId, action: $tradeEntryCreateModel->winLoss === 'WIN'
+                $this->walletService->walleteAction(walletId: $tradeEntryCreateModel->walletId, userId: $userId, action: $tradeEntryCreateModel->winLoss === 'WIN'
                     ? "deposite" : "withdraw", amount: $tradeAmt, isLog: false, date: $tradeEntryCreateModel->date);
                 $this->walletService->PaymentLogsActions(
                     amount: $tradeAmt,

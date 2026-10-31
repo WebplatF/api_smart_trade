@@ -679,6 +679,21 @@ class WalletService
 
                 return (int) ceil($day / 7);
             });
+            Log::info('WEEKLY PAYMENT LOGS', [
+                'wallet_id' => $walletId,
+                'month' => $month,
+                'year' => $year,
+                'start_date' => $startDate->toDateTimeString(),
+                'end_date' => $endDate->toDateTimeString(),
+                'transactions' => $paymentLogs->map(function ($log) {
+                    return [
+                        'id' => $log->id,
+                        'amount' => $log->amount,
+                        'direction' => $log->direction,
+                        'created_at' => $log->created_at,
+                    ];
+                })->toArray(),
+            ]);
 
             // Calculate number of weeks in month
             $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);

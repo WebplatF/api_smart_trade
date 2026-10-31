@@ -607,7 +607,7 @@ class WalletService
      * @param string $year
      * @return array
      */
-    private function getWeekData(int $walletId, string $month, string $year)
+    /**  private function getWeekData(int $walletId, string $month, string $year)
     {
         try {
             $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
@@ -642,6 +642,80 @@ class WalletService
                     ];
                 })
                 ->values();
+            return $weeklyBalance;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }*/
+    /**
+     * Weekly Data
+     *
+     * @param integer $walletId
+     * @param string $month
+     * @param string $year
+     * @return array
+     */
+    private function getWeekData(int $walletId, string $month, string $year)
+    {
+        try {
+            $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
+                ->startOfMonth();
+
+            // Get previous month's last closing balance
+            $previousBalance = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->where('created_at', '<', $targetMonth)
+                ->orderBy('created_at', 'desc')
+                ->value('balance') ?? 0;
+
+            // Get current month's payment logs
+            $paymentLogs = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->whereBetween('created_at', [
+                    $targetMonth->copy()->startOfMonth(),
+                    $targetMonth->copy()->endOfMonth()
+                ])
+                ->get();
+
+            // Group transactions by week
+            $weeklyGroups = $paymentLogs->groupBy(function ($item) {
+                $day = Carbon::parse($item->created_at)->day;
+
+                return (int) ceil($day / 7);
+            });
+
+            // Calculate number of weeks in the month
+            $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
+
+            // Generate weekly data
+            $weeklyBalance = collect(range(1, $weeksInMonth))
+                ->map(function ($weekNumber) use (
+                    $weeklyGroups,
+                    $previousBalance
+                ) {
+                    $logs = $weeklyGroups->get($weekNumber, collect());
+
+                    // Calculate weekly inward/outward transactions
+                    $amount = $logs->sum(function ($log) {
+                        return $log->direction === 'Inward'
+                            ? (float) $log->amount
+                            : -(float) $log->amount;
+                    });
+
+                    // Add previous month's closing balance ONLY to Week 1
+                    if ($weekNumber === 1) {
+                        $amount += (float) $previousBalance;
+                    }
+
+                    return [
+                        'week' => $weekNumber,
+                        'amount' => number_format($amount, 2, '.', ''),
+                    ];
+                })
+                ->values();
+
             return $weeklyBalance;
         } catch (QueryException $e) {
             throw DatabaseErrorHelper::handle(e: $e);
@@ -723,7 +797,7 @@ class WalletService
                         // 'year' => $index + 1,
                         'year' => (string) $year,
                         // 'amount' => number_format($amount, 2, '.', ''),
-                        'amount' => number_format((float) ($amount?? 0), 2, '.', ''),
+                        'amount' => number_format((float) ($amount ?? 0), 2, '.', ''),
                     ];
                 })
                 ->values();

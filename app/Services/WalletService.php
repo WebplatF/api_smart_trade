@@ -661,7 +661,7 @@ class WalletService
     {
         try {
 
-            // Initialize selected month correctly
+            // Selected month
             $targetMonth = Carbon::createFromDate(
                 (int) $year,
                 (int) $month,
@@ -671,47 +671,53 @@ class WalletService
             $startDate = $targetMonth->copy()->startOfMonth();
             $endDate = $targetMonth->copy()->addMonth()->startOfMonth();
 
-            // Get only selected month's payment logs
+            // Get all previous month transactions
+            $previousLogs = PaymentLogs::where('is_delete', 0)
+                ->where('wallet_id', $walletId)
+                ->where('created_at', '<', $startDate)
+                ->get();
+
+            // Calculate previous closing balance
+            $previousBalance = $previousLogs->sum(function ($log) {
+
+                if ($log->direction === 'Inward') {
+                    return (float) $log->amount;
+                }
+
+                if ($log->direction === 'Outward') {
+                    return -(float) $log->amount;
+                }
+
+                return 0;
+            });
+
+            // Get selected month's transactions only
             $paymentLogs = PaymentLogs::where('is_delete', 0)
                 ->where('wallet_id', $walletId)
                 ->where('created_at', '>=', $startDate)
                 ->where('created_at', '<', $endDate)
                 ->get();
 
-            // Debug log
-            Log::info('WEEKLY PAYMENT LOGS', [
-                'wallet_id' => $walletId,
-                'month' => $month,
-                'year' => $year,
-                'start_date' => $startDate->toDateTimeString(),
-                'end_date' => $endDate->toDateTimeString(),
-                'transactions' => $paymentLogs->map(function ($log) {
-                    return [
-                        'id' => $log->id,
-                        'amount' => $log->amount,
-                        'direction' => $log->direction,
-                        'created_at' => $log->created_at,
-                    ];
-                })->toArray(),
-            ]);
-
-            // Group transactions by week (1-7, 8-14, etc.)
+            // Group transactions by week
             $weeklyGroups = $paymentLogs->groupBy(function ($item) {
-                $day = Carbon::parse($item->created_at)->day;
-
-                return (int) ceil($day / 7);
+                return (int) ceil(
+                    Carbon::parse($item->created_at)->day / 7
+                );
             });
 
-            // Calculate number of weeks in selected month
+            // Number of weeks in month
             $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
 
             // Generate weekly data
             $weeklyBalance = collect(range(1, $weeksInMonth))
-                ->map(function ($weekNumber) use ($weeklyGroups) {
+                ->map(function ($weekNumber) use (
+                    $weeklyGroups,
+                    $previousBalance
+                ) {
 
                     $logs = $weeklyGroups->get($weekNumber, collect());
 
-                    // Calculate inward and outward transactions
+                    // Calculate weekly transaction total
                     $amount = $logs->sum(function ($log) {
 
                         if ($log->direction === 'Inward') {
@@ -724,6 +730,11 @@ class WalletService
 
                         return 0;
                     });
+
+                    // Add previous closing balance ONLY to Week 1
+                    if ($weekNumber === 1) {
+                        $amount += (float) $previousBalance;
+                    }
 
                     return [
                         'week' => $weekNumber,

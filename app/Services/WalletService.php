@@ -660,25 +660,25 @@ class WalletService
     private function getWeekData(int $walletId, string $month, string $year)
     {
         try {
-            $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
-                ->startOfMonth();
+
+            // Initialize selected month correctly
+            $targetMonth = Carbon::createFromDate(
+                (int) $year,
+                (int) $month,
+                1
+            )->startOfMonth();
 
             $startDate = $targetMonth->copy()->startOfMonth();
             $endDate = $targetMonth->copy()->addMonth()->startOfMonth();
 
-            // Get only selected month's transactions
+            // Get only selected month's payment logs
             $paymentLogs = PaymentLogs::where('is_delete', 0)
                 ->where('wallet_id', $walletId)
                 ->where('created_at', '>=', $startDate)
                 ->where('created_at', '<', $endDate)
                 ->get();
 
-            // Group transactions by week
-            $weeklyGroups = $paymentLogs->groupBy(function ($item) {
-                $day = Carbon::parse($item->created_at)->day;
-
-                return (int) ceil($day / 7);
-            });
+            // Debug log
             Log::info('WEEKLY PAYMENT LOGS', [
                 'wallet_id' => $walletId,
                 'month' => $month,
@@ -695,7 +695,14 @@ class WalletService
                 })->toArray(),
             ]);
 
-            // Calculate number of weeks in month
+            // Group transactions by week (1-7, 8-14, etc.)
+            $weeklyGroups = $paymentLogs->groupBy(function ($item) {
+                $day = Carbon::parse($item->created_at)->day;
+
+                return (int) ceil($day / 7);
+            });
+
+            // Calculate number of weeks in selected month
             $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
 
             // Generate weekly data
@@ -704,7 +711,7 @@ class WalletService
 
                     $logs = $weeklyGroups->get($weekNumber, collect());
 
-                    // Calculate inward and outward amounts
+                    // Calculate inward and outward transactions
                     $amount = $logs->sum(function ($log) {
 
                         if ($log->direction === 'Inward') {
@@ -727,8 +734,10 @@ class WalletService
 
             return $weeklyBalance;
         } catch (QueryException $e) {
+
             throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {
+
             throw new Exception($e->getMessage());
         }
     }

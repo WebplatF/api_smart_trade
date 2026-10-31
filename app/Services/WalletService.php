@@ -663,57 +663,45 @@ class WalletService
             $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
                 ->startOfMonth();
 
-            // Get all previous transactions
-            $previousLogs = PaymentLogs::where('is_delete', 0)
-                ->where('wallet_id', $walletId)
-                ->where('created_at', '<', $targetMonth)
-                ->get();
+            $startDate = $targetMonth->copy()->startOfMonth();
+            $endDate = $targetMonth->copy()->addMonth()->startOfMonth();
 
-            // Calculate previous closing balance using amount and direction
-            $previousBalance = $previousLogs->sum(function ($log) {
-                return $log->direction === 'Inward'
-                    ? (float) $log->amount
-                    : -(float) $log->amount;
-            });
-
-            // Get current month's payment logs
+            // Get only selected month's transactions
             $paymentLogs = PaymentLogs::where('is_delete', 0)
                 ->where('wallet_id', $walletId)
-                ->whereBetween('created_at', [
-                    $targetMonth->copy()->startOfMonth(),
-                    $targetMonth->copy()->endOfMonth()
-                ])
+                ->where('created_at', '>=', $startDate)
+                ->where('created_at', '<', $endDate)
                 ->get();
 
-            // Group transactions by week (1-7, 8-14, etc.)
+            // Group transactions by week
             $weeklyGroups = $paymentLogs->groupBy(function ($item) {
                 $day = Carbon::parse($item->created_at)->day;
 
                 return (int) ceil($day / 7);
             });
 
-            // Calculate number of weeks in the month
+            // Calculate number of weeks in month
             $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
 
             // Generate weekly data
             $weeklyBalance = collect(range(1, $weeksInMonth))
-                ->map(function ($weekNumber) use (
-                    $weeklyGroups,
-                    $previousBalance
-                ) {
+                ->map(function ($weekNumber) use ($weeklyGroups) {
+
                     $logs = $weeklyGroups->get($weekNumber, collect());
 
-                    // Calculate weekly inward/outward transactions
+                    // Calculate inward and outward amounts
                     $amount = $logs->sum(function ($log) {
-                        return $log->direction === 'Inward'
-                            ? (float) $log->amount
-                            : -(float) $log->amount;
-                    });
 
-                    // Add previous closing balance ONLY to Week 1
-                    if ($weekNumber === 1) {
-                        $amount += (float) $previousBalance;
-                    }
+                        if ($log->direction === 'Inward') {
+                            return (float) $log->amount;
+                        }
+
+                        if ($log->direction === 'Outward') {
+                            return -(float) $log->amount;
+                        }
+
+                        return 0;
+                    });
 
                     return [
                         'week' => $weekNumber,

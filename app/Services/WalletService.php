@@ -806,7 +806,7 @@ class WalletService
                 throw new Exception("Already pair is available...!");
             }
             $pairCount = PairMaster::where('user_id', $userId)->count();
-            if ($pairCount <= 15) {
+            if ($pairCount >= 15) {
                 throw new Exception("Allowed to create 15 pairs only...!");
             }
             PairMaster::create([

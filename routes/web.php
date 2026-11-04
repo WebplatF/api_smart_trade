@@ -72,7 +72,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         $router->delete('/payment_log/{logId}', 'Wallet\WalletController@deletePaymentLog');
         $router->post('/pair/create', 'Wallet\WalletController@createPair');
         $router->delete('/pair/delete', 'Wallet\WalletController@deletePair');
-        $router->delete('/pair/list', 'Wallet\WalletController@pairList');
+        $router->get('/pair/list', 'Wallet\WalletController@pairList');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

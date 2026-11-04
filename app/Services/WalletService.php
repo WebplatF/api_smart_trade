@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Helper\DatabaseErrorHelper;
+use App\Models\PairMaster;
 use App\Models\PaymentLogs;
 use App\Models\TradeEntry;
 use App\Models\Wallet;
 use App\Resources\CalenderMonthResources;
+use App\Resources\PairListResources;
 use App\Resources\PaymentLogsResources;
 use App\Resources\WalletResources;
 use App\Resources\WalletSummaryResources;
@@ -607,56 +609,6 @@ class WalletService
      * @param string $year
      * @return array
      */
-    /**  private function getWeekData(int $walletId, string $month, string $year)
-    {
-        try {
-            $targetMonth = Carbon::createFromFormat('m Y', "{$month} {$year}")
-                ->startOfMonth();
-            $paymentLogs = PaymentLogs::where('is_delete', 0)
-                ->where('wallet_id', $walletId)->get();
-            $weeklyBalance = $paymentLogs
-                ->filter(function ($item) use ($targetMonth) {
-                    return Carbon::parse($item->created_at)
-                        ->isSameMonth($targetMonth);
-                })
-                ->groupBy(function ($item) {
-                    $day = Carbon::parse($item->created_at)->day;
-
-                    return (int) ceil($day / 7);
-                });
-            // Always create all weeks
-            $weeksInMonth = (int) ceil($targetMonth->daysInMonth / 7);
-            $weeklyBalance = collect(range(1, $weeksInMonth))
-                ->map(function ($weekNumber) use ($weeklyBalance, $targetMonth) {
-                    $logs = $weeklyBalance->get($weekNumber, collect());
-                    $amount = $logs->sum(function ($log) {
-                        return $log->direction === 'Inward'
-                            ? (float) $log->amount
-                            : -(float) $log->amount;
-                    });
-                    $lastLog = $logs->sortBy('created_at')->last();
-                    return [
-                        'week' => $weekNumber,
-                        'amount' => number_format($amount, 2, '.', ''),
-                        // 'amount' => $lastLog->balance ?? '0.00',
-                    ];
-                })
-                ->values();
-            return $weeklyBalance;
-        } catch (QueryException $e) {
-            throw DatabaseErrorHelper::handle(e: $e);
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
-        }
-    }*/
-    /**
-     * Weekly Data
-     *
-     * @param integer $walletId
-     * @param string $month
-     * @param string $year
-     * @return array
-     */
     private function getWeekData(int $walletId, string $month, string $year)
     {
         try {
@@ -831,6 +783,76 @@ class WalletService
                 })
                 ->values();
             return $yearlyBalance;
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Pair Create
+     *
+     * @param integer $userId
+     * @param string $pair
+     * @return void
+     */
+    public function createPair(
+        int $userId,
+        string $pair
+    ) {
+        try {
+            $oldPair = PairMaster::where('user_id', $userId)->where('pair', $pair)->first();
+            if ($oldPair) {
+                throw new Exception("Already pair is available...!");
+            }
+            $pairCount = PairMaster::where('user_id', $userId)->count();
+            if ($pairCount <= 15) {
+                throw new Exception("Allowed to create 15 pairs only...!");
+            }
+            PairMaster::create([
+                'user_id' => $userId,
+                'pair' => $pair,
+            ]);
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Pair Delete
+     *
+     * @param string $pair
+     * @return void
+     */
+    public function deletePair(
+        int $userId,
+        string $pair
+    ) {
+        try {
+            $oldPair = PairMaster::where('user_id', $userId)->where('pair', $pair)->first();
+            if (!$oldPair) {
+                throw new Exception("Pair is not available...!");
+            }
+            $oldPair->delete();
+        } catch (QueryException $e) {
+            throw DatabaseErrorHelper::handle(e: $e);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    /**
+     * Pair List
+     *
+     * @param integer $userId
+     * @return array
+     */
+    public function pairList(int $userId)
+    {
+        try {
+            $pairs = PairMaster::where('user_id', $userId)->get();
+            $pairList = PairListResources::collection($pairs)->resolve();
+            return $pairList;
         } catch (QueryException $e) {
             throw DatabaseErrorHelper::handle(e: $e);
         } catch (Exception $e) {

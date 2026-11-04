@@ -70,6 +70,9 @@ $router->group(['prefix' => 'api', 'middleware' => 'apikey'], function () use ($
         // new requirement
         $router->delete('/wallet/delete/{walletId}', 'Wallet\WalletController@deleteWallet');
         $router->delete('/payment_log/{logId}', 'Wallet\WalletController@deletePaymentLog');
+        $router->post('/pair/create', 'Wallet\WalletController@createPair');
+        $router->delete('/pair/delete', 'Wallet\WalletController@deletePair');
+        $router->delete('/pair/list', 'Wallet\WalletController@pairList');
     });
     $router->group(['prefix' => 'admin', 'middleware' => 'token'], function () use ($router) {
         $router->post('/add_banner', 'Admin\HomePageController@addBanner');

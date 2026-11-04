@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wallet;
 use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Services\WalletService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -202,6 +203,47 @@ class WalletController extends Controller
         try {
             $this->walletService->deleteWallet(walletId: $walletId);
             return ResponseHelper::successResponse(message: "wallet deleted successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    public function createPair(Request $request)
+    {
+        try {
+            $Validator = Validator::make($request->all(), [
+                'pair'     => 'required|strict_string',
+            ]);
+            if ($Validator->fails()) {
+                throw new Exception($Validator->errors()->first());
+            }
+            $userId = $request->get('user_id');
+            $pair = $request->get('pair');
+            $this->walletService->createPair(userId: $userId, pair: $pair);
+            return ResponseHelper::successResponse(message: "pair created successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    public function deletePair(Request $request)
+    {
+        try {
+            $userId = $request->get('user_id');
+            $pair = $request->query('pair');
+            if (!$pair) {
+                throw new Exception("Pair is required..!");
+            }
+            $this->walletService->deletePair(userId: $userId, pair: $pair);
+            return ResponseHelper::successResponse(message: "pair deleted successfully...!", code: 200);
+        } catch (Throwable $e) {
+            return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
+        }
+    }
+    public function pairList(Request $request)
+    {
+        try {
+            $userId = $request->get('user_id');
+            $pairList = $this->walletService->pairList(userId: $userId);
+            return ResponseHelper::successResponse(data: $pairList, message: "pair list arrived successfully...!", code: 200);
         } catch (Throwable $e) {
             return ResponseHelper::failureResponse(message: $e->getMessage(), code: 400);
         }

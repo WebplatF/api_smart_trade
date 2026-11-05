@@ -22,6 +22,8 @@ class WalletSummaryResources extends JsonResource
                 "total_deposit" => $this['total_deposit'] ?? "0.00",
             ],
 
+            "currency" => $this['currency'] ?? 'USD',
+
             "years" => $this['years'] ?? [],
 
             "months" => $this['months'] ?? [],

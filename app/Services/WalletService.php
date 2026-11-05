@@ -473,6 +473,7 @@ class WalletService
                 ->toArray();
             $data = [
                 "wallet" => $wallet->amount ?? "0.00",
+                "currency" => $wallet->currency ?? "USD",
                 "total_profits" => $totalProfit ?? "0.00",
                 "total_loss" => $totalLoss ?? "0.00",
                 "total_withdraw" =>  $totalWithdrawal ?? "0.00",

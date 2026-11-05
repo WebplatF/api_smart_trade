@@ -12,8 +12,8 @@ class WalletResources extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name ?? "",
-            'amount' => $this->amount ?? 0,
             'currency' => $this->currency ?? 'USD',
+            'amount' => $this->amount ?? 0,
             'create_date' => $this->wallet_create_date,
             'status' => (bool)$this->is_delete ?? false,
         ];

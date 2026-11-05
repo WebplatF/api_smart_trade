@@ -4,10 +4,13 @@ namespace App\Helper;
 
 use Exception;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
-class DatabaseErrorHelper {
-     public static function handle(QueryException $e): Exception
+class DatabaseErrorHelper
+{
+    public static function handle(QueryException $e): Exception
     {
+        Log::error("Error", ["Details" => $e]);
         $sqlState = $e->errorInfo[0] ?? null; // SQLSTATE
         $errorCode = $e->errorInfo[1] ?? null; // Database-specific code
         $dbMessage = $e->errorInfo[2] ?? $e->getMessage();

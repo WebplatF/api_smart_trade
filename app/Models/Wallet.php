@@ -10,6 +10,7 @@ class Wallet extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'currency',
         'amount',
         'wallet_create_date',
         'is_delete',

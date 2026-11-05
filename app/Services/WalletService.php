@@ -66,10 +66,10 @@ class WalletService
      *
      * @return object
      */
-    public function walleteCreation(int $userId, string $name, string $date, float $amount)
+    public function walleteCreation(int $userId, string $name, string $date, float $amount, string $currency)
     {
         try {
-            return DB::transaction(function () use ($userId, $name, $date, $amount) {
+            return DB::transaction(function () use ($userId, $name, $date, $amount, $currency) {
                 $wallet = Wallet::where('user_id', $userId)->where('name', $name)
                     ->where('is_delete', 0)
                     ->first();
@@ -91,6 +91,7 @@ class WalletService
                         'user_id' => $userId,
                         'name' => $name,
                         'amount' => $walletAmount,
+                        'currency' => $currency,
                         'wallet_create_date' => $timestamp,
                     ]);
                     if ($walletAmount > 0.00) {
